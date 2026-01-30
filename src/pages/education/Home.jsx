@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { 
-    BookOpen, 
     CalendarPlus, 
     Student, 
     Lightning, 
@@ -10,7 +9,6 @@ import {
 } from "@phosphor-icons/react";
 
 // Sub-components
-import LearningCourses from "./LearningCourses";
 import EventFinder from "./EventFinder";
 import Scholarships from "./Scholarships";
 import SkillDevelopment from "./SkillDevelopment";
@@ -22,64 +20,44 @@ const Home = () => {
 
     const menuItems = [
         { 
-            id: "courses", 
-            title: "Learning Courses", 
-            icon: BookOpen, 
-            color: "text-blue-500", 
-            bg: "bg-blue-50", 
-            border: "hover:border-blue-200",
-            desc: "Access premium video content and tutorials." 
-        },
-        { 
             id: "events", 
             title: "Event Finder", 
             icon: CalendarPlus, 
-            color: "text-purple-500", 
-            bg: "bg-purple-50", 
-            border: "hover:border-purple-200",
+            accent: "purple",
             desc: "Workshops, seminars & local meetups." 
         },
         { 
             id: "scholarships", 
             title: "Scholarships", 
             icon: Student, 
-            color: "text-yellow-500", 
-            bg: "bg-yellow-50", 
-            border: "hover:border-yellow-200",
+            accent: "yellow",
             desc: "Financial aid & grant opportunities." 
         },
         { 
             id: "skills", 
             title: "Skill Development", 
             icon: Lightning, 
-            color: "text-orange-500", 
-            bg: "bg-orange-50", 
-            border: "hover:border-orange-200",
+            accent: "orange",
             desc: "Track progress & earn certifications." 
         },
         { 
             id: "immersive", 
             title: "360° Learning", 
             icon: Cube, 
-            color: "text-teal-500", 
-            bg: "bg-teal-50", 
-            border: "hover:border-teal-200",
+            accent: "teal",
             desc: "Interactive 3D object viewer & AR." 
         },
         { 
             id: "disability", 
             title: "Disability Support", 
             icon: Wheelchair, 
-            color: "text-indigo-500", 
-            bg: "bg-indigo-50", 
-            border: "hover:border-indigo-200",
+            accent: "indigo",
             desc: "Inclusive tools & accessibility settings." 
         },
     ];
 
     const renderView = () => {
         switch (activeView) {
-            case "courses": return <LearningCourses />;
             case "events": return <EventFinder />;
             case "scholarships": return <Scholarships />;
             case "skills": return <SkillDevelopment />;
@@ -106,6 +84,55 @@ const Home = () => {
         );
     }
 
+    // Helper to get color classes based on accent
+    const getColorClasses = (accent) => {
+        const colors = {
+            blue: {
+                bg: "bg-blue-100",
+                bgHover: "group-hover:bg-blue-200/80",
+                text: "text-blue-600",
+                bar: "bg-blue-500",
+                groupText: "group-hover:text-blue-600"
+            },
+            purple: {
+                bg: "bg-purple-100",
+                bgHover: "group-hover:bg-purple-200/80",
+                text: "text-purple-600",
+                bar: "bg-purple-500",
+                groupText: "group-hover:text-purple-600"
+            },
+            yellow: {
+                bg: "bg-yellow-100",
+                bgHover: "group-hover:bg-yellow-200/80",
+                text: "text-yellow-600",
+                bar: "bg-yellow-500",
+                groupText: "group-hover:text-yellow-600"
+            },
+            orange: {
+                bg: "bg-orange-100",
+                bgHover: "group-hover:bg-orange-200/80",
+                text: "text-orange-600",
+                bar: "bg-orange-500",
+                groupText: "group-hover:text-orange-600"
+            },
+            teal: {
+                bg: "bg-teal-100",
+                bgHover: "group-hover:bg-teal-200/80",
+                text: "text-teal-600",
+                bar: "bg-teal-500",
+                groupText: "group-hover:text-teal-600"
+            },
+            indigo: {
+                bg: "bg-indigo-100",
+                bgHover: "group-hover:bg-indigo-200/80",
+                text: "text-indigo-600",
+                bar: "bg-indigo-500",
+                groupText: "group-hover:text-indigo-600"
+            }
+        };
+        return colors[accent] || colors.blue;
+    };
+
     return (
         <div className="min-h-full pb-12">
             <div className="mb-10">
@@ -113,31 +140,37 @@ const Home = () => {
                 <p className="text-slate-500 mt-2 text-lg">Select a module to begin your learning journey.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {menuItems.map((item) => (
-                    <div 
-                        key={item.id}
-                        onClick={() => setActiveView(item.id)}
-                        className={`bg-white p-8 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 cursor-pointer group hover:shadow-xl hover:-translate-y-1 ${item.border} relative overflow-hidden h-80 flex flex-col justify-between`}
-                    >
-                        {/* Background Decoration */}
-                        <div className={`absolute top-0 right-0 w-32 h-32 ${item.bg} rounded-bl-[100px] -mr-4 -mt-4 opacity-50 transition-transform group-hover:scale-110`}></div>
-
-                        <div className="relative z-10">
-                            <div className={`w-16 h-16 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mb-6 shadow-sm`}>
-                                <item.icon size={32} weight="duotone" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {menuItems.map((item) => {
+                    const theme = getColorClasses(item.accent);
+                    return (
+                        <div 
+                            key={item.id}
+                            onClick={() => setActiveView(item.id)}
+                            className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group h-80 flex flex-col hover:-translate-y-1"
+                        >
+                            {/* Top Half - Image/Icon Area */}
+                            <div className={`h-[55%] ${theme.bg} flex items-center justify-center relative ${theme.bgHover} transition-colors`}>
+                                <div className={`w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-sm ${theme.text}`}>
+                                    <item.icon size={36} weight="duotone" />
+                                </div>
                             </div>
-                            <h3 className="text-2xl font-bold text-slate-900 mb-3">{item.title}</h3>
-                            <p className="text-slate-500 leading-relaxed">{item.desc}</p>
+
+                            {/* Bottom Half - Content Area */}
+                            <div className="h-[45%] p-6 flex flex-col justify-center bg-white relative">
+                                {/* Decorative 'Title Bar' pill from reference */}
+                                <div className={`w-12 h-1.5 rounded-full ${theme.bar} mb-4 opacity-80`}></div>
+                                
+                                <h3 className={`text-xl font-bold text-slate-900 mb-2 ${theme.groupText} transition-colors`}>
+                                    {item.title}
+                                </h3>
+                                <p className="text-slate-500 text-sm leading-relaxed font-medium line-clamp-2">
+                                    {item.desc}
+                                </p>
+                            </div>
                         </div>
-                        
-                        <div className="relative z-10 pt-4">
-                            <span className={`inline-flex items-center font-bold ${item.color} text-sm group-hover:translate-x-1 transition-transform`}>
-                                Explore Module <ArrowLeft className="rotate-180 ml-2" weight="bold"/>
-                            </span>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
