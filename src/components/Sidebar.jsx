@@ -7,10 +7,24 @@ import {
     Gear,
     SignOut,
 } from "@phosphor-icons/react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import * as Avatar from "@radix-ui/react-avatar"; // Radix UI Avatar
+import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
+    const { logout, userProfile } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async (e) => {
+        e.preventDefault(); // Prevent link navigation if inside link, though button is outside or nested
+        try {
+            await logout();
+            navigate("/login");
+        } catch (error) {
+            console.error("Failed to log out", error);
+        }
+    };
+
     const navItems = [
         { icon: SquaresFour, label: "Dashboard", path: "/" },
         { icon: Student, label: "Education", path: "/education" },
@@ -24,10 +38,10 @@ const Sidebar = () => {
             {/* Logo Area */}
             <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950/50 backdrop-blur-sm">
                 <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-blue-500 rounded-lg mr-3 flex items-center justify-center shadow-lg shadow-teal-500/20">
-                    <span className="font-bold text-white text-lg">U</span>
+                    <span className="font-bold text-white text-lg">S</span>
                 </div>
                 <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                    UBS Platform
+                    SYNERGIA
                 </span>
             </div>
 
@@ -64,15 +78,31 @@ const Sidebar = () => {
                     <span className="text-sm font-medium">Settings</span>
                 </button>
 
-                <div className="flex items-center p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 mt-2">
-                    <Avatar.Root className="h-9 w-9 rounded-full bg-teal-600 flex items-center justify-center overflow-hidden border border-slate-600">
-                        <Avatar.Fallback className="text-white text-xs font-bold">JD</Avatar.Fallback>
-                    </Avatar.Root>
-                    <div className="ml-3 flex-1 overflow-hidden">
-                        <p className="text-sm font-medium text-white truncate">John Doe</p>
-                        <p className="text-xs text-slate-400 truncate">Citizen ID: #8392</p>
-                    </div>
-                    <button className="text-slate-400 hover:text-red-400 transition-colors ml-1">
+                <div className="flex items-center p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 mt-2 hover:bg-slate-800 transition-colors group relative">
+                    <Link to="/profile" className="flex items-center flex-1 min-w-0">
+                        <Avatar.Root className="h-9 w-9 rounded-full bg-teal-600 flex items-center justify-center overflow-hidden border border-slate-600 group-hover:border-teal-500 transition-colors shrink-0">
+                            {userProfile?.photoUrl ? (
+                                <Avatar.Image src={userProfile.photoUrl} className="h-full w-full object-cover" />
+                            ) : (
+                                <Avatar.Fallback className="text-white text-xs font-bold">
+                                    {userProfile?.name ? userProfile.name.slice(0, 2).toUpperCase() : "JD"}
+                                </Avatar.Fallback>
+                            )}
+                        </Avatar.Root>
+                        <div className="ml-3 flex-1 overflow-hidden">
+                            <p className="text-sm font-medium text-white truncate">
+                                {userProfile?.name || "User"}
+                            </p>
+                            <p className="text-xs text-slate-400 truncate">
+                                {userProfile?.verificationStatus === 'verified' ? 'Verified' : 'Member'}
+                            </p>
+                        </div>
+                    </Link>
+                    <button
+                        onClick={handleLogout}
+                        className="p-2 text-slate-400 hover:text-red-400 transition-colors ml-1 z-10"
+                        title="Sign Out"
+                    >
                         <SignOut size={20} />
                     </button>
                 </div>

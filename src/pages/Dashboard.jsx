@@ -6,13 +6,26 @@ import {
     TrendUp,
     WarningCircle,
     CheckCircle,
+    UserCircle,
+    Briefcase
 } from "@phosphor-icons/react";
+import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => {
+    const { userProfile } = useAuth();
+
+    // Default values if no user profile is loaded yet
+    const userData = userProfile || {
+        name: "Guest",
+        profession: "Unknown",
+        verificationStatus: "unverified",
+        roles: {}
+    };
+
     const stats = [
         {
             title: "Education Status",
-            value: "Enrolled",
+            value: userData.roles?.education ? "Enrolled" : "Not Enrolled",
             subtext: "Advanced React Course",
             icon: Student,
             color: "bg-blue-500",
@@ -21,7 +34,7 @@ const Dashboard = () => {
         },
         {
             title: "Healthcare",
-            value: "Active",
+            value: userData.roles?.healthcare ? "Active" : "Pending",
             subtext: "Next checkup in 14 days",
             icon: Heartbeat,
             color: "bg-rose-500",
@@ -30,7 +43,7 @@ const Dashboard = () => {
         },
         {
             title: "Transport Pass",
-            value: "Valid",
+            value: userData.roles?.transport ? "Valid" : "Expired",
             subtext: "Expires: Dec 2026",
             icon: Bus,
             color: "bg-amber-500",
@@ -39,7 +52,7 @@ const Dashboard = () => {
         },
         {
             title: "Housing Support",
-            value: "Eligible",
+            value: userData.roles?.housing ? "Eligible" : "In Review",
             subtext: "Application in review",
             icon: House,
             color: "bg-emerald-500",
@@ -70,16 +83,31 @@ const Dashboard = () => {
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Overview</h1>
-                    <p className="text-slate-500 mt-1">
-                        Summary of your accessed services and current status.
-                    </p>
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                    {userData.photoUrl && (
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md">
+                            <img src={userData.photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                        </div>
+                    )}
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-800">Welcome, {userData.name}</h1>
+                        <div className="flex items-center gap-2 text-slate-500 mt-1">
+                            <Briefcase size={16} />
+                            <span>{userData.profession}</span>
+                            <span className="mx-1">•</span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase ${userData.verificationStatus === 'verified' ? 'bg-green-100 text-green-700' :
+                                    userData.verificationStatus === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                        'bg-gray-100 text-gray-700'
+                                }`}>
+                                {userData.verificationStatus}
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right hidden md:block">
                     <p className="text-sm text-slate-400 font-medium">Last synced</p>
-                    <p className="text-slate-600 font-bold">Today, 7:00 PM</p>
+                    <p className="text-slate-600 font-bold">Today, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
             </div>
 
@@ -121,7 +149,7 @@ const Dashboard = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-slate-800">Vocational Training Program</h3>
-                                        <p className="text-sm text-slate-500">Free certification for eligible candidates.</p>
+                                        <p className="text-sm text-slate-500">Free certification for eligible {userData.profession}s.</p>
                                     </div>
                                 </div>
                                 <button className="px-4 py-2 bg-white text-slate-700 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50">Apply Now</button>

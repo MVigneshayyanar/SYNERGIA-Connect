@@ -2,6 +2,10 @@ import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { AnimatePresence, motion } from "framer-motion";
 import { CaretRight } from "@phosphor-icons/react";
+import AccessibilityPopup from "../components/AccessibilityPopup";
+import VoiceAssistant from "../components/VoiceAssistant";
+import SignLanguageWidget from "../components/SignLanguageWidget";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const MainLayout = () => {
   const location = useLocation();
@@ -17,6 +21,9 @@ const MainLayout = () => {
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
       <Sidebar />
+      <AccessibilityPopup />
+      <VoiceAssistant />
+      <SignLanguageWidget />
 
       {/* Main Content Wrapper */}
       <main className="flex-1 ml-64 h-screen flex flex-col relative w-full">
@@ -30,13 +37,16 @@ const MainLayout = () => {
             </span>
           </div>
           {/* Right side of header (optional: date, notifications, etc) */}
-          <div className="text-xs font-medium text-slate-400">
-            {new Date().toLocaleDateString(undefined, {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+          <div className="text-xs font-medium text-slate-400 flex items-center gap-4">
+            <LanguageSwitcher />
+            <span>
+              {new Date().toLocaleDateString(undefined, {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </span>
           </div>
         </header>
 
