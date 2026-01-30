@@ -1,8 +1,17 @@
-import { Student, Bank, ArrowRight } from "@phosphor-icons/react";
+import { useState } from "react";
+import { Student, Bank, ArrowRight, X, GraduationCap, CheckCircle, Warning } from "@phosphor-icons/react";
 
 const Scholarships = () => {
+    const [showPopup, setShowPopup] = useState(false);
+    const [eligibilityResult, setEligibilityResult] = useState(null);
+
+    const closePopup = () => {
+        setShowPopup(false);
+        setEligibilityResult(null);
+    };
+
     return (
-        <div className="h-full flex flex-col space-y-8 animate-fade-in">
+        <div className="h-full flex flex-col space-y-8 animate-fade-in relative">
             {/* Hero Card */}
             <div className="bg-gradient-to-r from-yellow-400 to-amber-500 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-xl shadow-yellow-500/20">
                 <div className="relative z-10 w-full md:w-3/4">
@@ -11,7 +20,10 @@ const Scholarships = () => {
                     <p className="text-slate-900/80 font-medium mb-8 max-w-xl">
                         Browse over 1,500 financial aid opportunities tailored to your academic profile. We've matched over $2M in funds to students like you.
                     </p>
-                    <button className="bg-slate-900 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-slate-800 hover:shadow-lg transition-all flex items-center">
+                    <button 
+                        onClick={() => setShowPopup(true)}
+                        className="bg-slate-900 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-slate-800 hover:shadow-lg transition-all flex items-center"
+                    >
                         Check Eligibility <ArrowRight className="ml-2" weight="bold"/>
                     </button>
                 </div>
@@ -51,6 +63,153 @@ const Scholarships = () => {
                     </div>
                 ))}
             </div>
+
+            {/* Eligibility Popup */}
+            {showPopup && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800">Check Eligibility</h3>
+                                <p className="text-xs text-slate-500 mt-1">Verify for Free Seat Program</p>
+                            </div>
+                            <button onClick={closePopup} className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50">
+                                <X size={20} weight="bold" />
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {!eligibilityResult ? (
+                                <EligibilityForm onSubmit={(result) => setEligibilityResult(result)} />
+                            ) : (
+                                <EligibilityResult status={eligibilityResult} onRetry={() => setEligibilityResult(null)} onClose={closePopup} />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const EligibilityForm = ({ onSubmit }) => {
+    const [formData, setFormData] = useState({
+        gpa: "",
+        income: "",
+        category: "General"
+    });
+
+    const isEligible = () => {
+        // Simple mock logic
+        const gpa = parseFloat(formData.gpa);
+        const income = parseFloat(formData.income);
+        
+        // Example criteria: GPA > 7.5 and Income < 800000
+        if (gpa >= 7.5 && income < 800000) return 'eligible';
+        return 'not-eligible';
+    };
+
+    const check = (e) => {
+        e.preventDefault();
+        // Simulate checking
+        setTimeout(() => {
+            const result = isEligible();
+            onSubmit(result);
+        }, 800);
+    };
+
+    return (
+        <form onSubmit={check} className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
+                <div className="flex items-start">
+                    <GraduationCap size={24} className="text-blue-600 mr-3 mt-0.5" weight="duotone"/>
+                    <div>
+                        <h4 className="font-bold text-blue-800 text-sm">Free Seat Eligibility Check</h4>
+                        <p className="text-blue-600 text-xs mt-1">Enter your academic details to instantly verify if you qualify for a 100% tuition waiver.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">CGPA / Percentage</label>
+                <input 
+                    type="number" 
+                    step="0.01" 
+                    placeholder="e.g. 8.5" 
+                    required 
+                    value={formData.gpa}
+                    onChange={(e) => setFormData({...formData, gpa: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all font-medium"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Annual Family Income (₹)</label>
+                <input 
+                    type="number" 
+                    placeholder="e.g. 500000" 
+                    required 
+                    value={formData.income}
+                    onChange={(e) => setFormData({...formData, income: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all font-medium"
+                />
+            </div>
+             <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Category</label>
+                <select 
+                    value={formData.category}
+                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all font-medium"
+                >
+                    <option>General</option>
+                    <option>OBC</option>
+                    <option>SC/ST</option>
+                    <option>EWS</option>
+                </select>
+            </div>
+
+            <button type="submit" className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 hover:shadow-lg transition-all mt-4">
+                Check My Eligibility
+            </button>
+        </form>
+    );
+};
+
+const EligibilityResult = ({ status, onRetry, onClose }) => {
+    if (status === 'eligible') {
+        return (
+            <div className="text-center space-y-4 animate-scale-in">
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle size={40} weight="fill" className="text-green-600" />
+                </div>
+                <div>
+                    <h4 className="text-2xl font-bold text-slate-800">You are Eligible!</h4>
+                    <p className="text-slate-500 mt-2">Congratulations! Based on your profile, you qualify for the <span className="font-bold text-green-600">Free Seat Program</span>.</p>
+                </div>
+                <div className="p-4 bg-green-50 rounded-xl border border-green-100 text-sm text-green-800 font-medium">
+                    Next Step: Submit your official transcript for verification.
+                </div>
+                <button onClick={onClose} className="w-full py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-all">
+                    Proceed to Apply
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="text-center space-y-4 animate-scale-in">
+            <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Warning size={40} weight="fill" className="text-amber-600" />
+            </div>
+            <div>
+                <h4 className="text-2xl font-bold text-slate-800">Partially Eligible</h4>
+                <p className="text-slate-500 mt-2">You might not qualify for the full free seat, but you are eligible for a <span className="font-bold text-amber-600">50% Tuition Waiver</span>.</p>
+            </div>
+            <button onClick={onRetry} className="text-slate-500 hover:text-slate-800 font-medium text-sm underline">
+                Check details again
+            </button>
+            <button onClick={onClose} className="w-full py-3 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-all">
+                View Partial Waiver
+            </button>
         </div>
     );
 };
