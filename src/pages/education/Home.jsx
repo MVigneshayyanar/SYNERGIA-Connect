@@ -147,27 +147,18 @@ const Home = () => {
                         <div 
                             key={item.id}
                             onClick={() => setActiveView(item.id)}
-                            className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group h-80 flex flex-col hover:-translate-y-1"
+                            className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group hover:-translate-y-1"
                         >
-                            {/* Top Half - Image/Icon Area */}
-                            <div className={`h-[55%] ${theme.bg} flex items-center justify-center relative ${theme.bgHover} transition-colors`}>
-                                <div className={`w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-sm ${theme.text}`}>
-                                    <item.icon size={36} weight="duotone" />
-                                </div>
+                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${theme.bg} ${theme.text} group-hover:scale-110 transition-transform`}>
+                                <item.icon size={32} weight="fill" />
                             </div>
-
-                            {/* Bottom Half - Content Area */}
-                            <div className="h-[45%] p-6 flex flex-col justify-center bg-white relative">
-                                {/* Decorative 'Title Bar' pill from reference */}
-                                <div className={`w-12 h-1.5 rounded-full ${theme.bar} mb-4 opacity-80`}></div>
-                                
-                                <h3 className={`text-xl font-bold text-slate-900 mb-2 ${theme.groupText} transition-colors`}>
-                                    {item.title}
-                                </h3>
-                                <p className="text-slate-500 text-sm leading-relaxed font-medium line-clamp-2">
-                                    {item.desc}
-                                </p>
-                            </div>
+                            
+                            <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
+                                {item.title}
+                            </h3>
+                            <p className="text-slate-500 text-sm leading-relaxed font-medium">
+                                {item.desc}
+                            </p>
                         </div>
                     );
                 })}

@@ -1,5 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,7 +14,31 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+let app, analytics, db, storage, auth;
 
-export { app, analytics };
+if (!firebaseConfig.apiKey) {
+    console.error("Firebase Configuration is missing! Please check your .env file.");
+    // Alert only in browser environment
+    if (typeof window !== "undefined") {
+        alert("CRITICAL ERROR: Firebase configuration is missing. Please create a .env file with your Firebase credentials. The app will not function correctly.");
+    }
+    // Mock objects to prevent crash
+    app = {};
+    analytics = {};
+    db = {}; 
+    storage = {}; 
+    auth = {};
+} else {
+    try {
+        app = initializeApp(firebaseConfig);
+        analytics = getAnalytics(app);
+        db = getFirestore(app);
+        storage = getStorage(app);
+        auth = getAuth(app);
+    } catch (error) {
+        console.error("Firebase Initialization Error:", error);
+        if (typeof window !== "undefined") alert("Firebase Initialization Error: " + error.message);
+    }
+}
+
+export { app, analytics, db, storage, auth };
