@@ -2,7 +2,6 @@ import { useState } from "react";
 import { 
     CalendarPlus, 
     Student, 
-    Lightning, 
     Cube, 
     Wheelchair, 
     ArrowLeft 
@@ -11,7 +10,6 @@ import {
 // Sub-components
 import EventFinder from "./EventFinder";
 import Scholarships from "./Scholarships";
-import SkillDevelopment from "./SkillDevelopment";
 import ImmersiveLearning from "./ImmersiveLearning";
 import DisabilitySupport from "./DisabilitySupport";
 
@@ -33,13 +31,7 @@ const Home = () => {
             accent: "yellow",
             desc: "Financial aid & grant opportunities." 
         },
-        { 
-            id: "skills", 
-            title: "Skill Development", 
-            icon: Lightning, 
-            accent: "orange",
-            desc: "Track progress & earn certifications." 
-        },
+
         { 
             id: "immersive", 
             title: "360° Learning", 
@@ -60,7 +52,6 @@ const Home = () => {
         switch (activeView) {
             case "events": return <EventFinder />;
             case "scholarships": return <Scholarships />;
-            case "skills": return <SkillDevelopment />;
             case "immersive": return <ImmersiveLearning />;
             case "disability": return <DisabilitySupport />;
             default: return null;
@@ -140,7 +131,7 @@ const Home = () => {
                 <p className="text-slate-500 mt-2 text-lg">Select a module to begin your learning journey.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                 {menuItems.map((item) => {
                     const theme = getColorClasses(item.accent);
                     return (
