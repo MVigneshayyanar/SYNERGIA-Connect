@@ -1,4 +1,5 @@
 import Home from "./education/Home";
+import HealthcareComponent from "./healthcare/Healthcare";
 import HousingHub from "./housing/Housing";
 
 export const Education = () => (
@@ -6,10 +7,7 @@ export const Education = () => (
 );
 
 export const Healthcare = () => (
-    <div className="p-8 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center h-96">
-        <h2 className="text-2xl font-bold text-slate-800">Healthcare Module</h2>
-        <p className="text-slate-500 mt-2">Manage appointments and health records.</p>
-    </div>
+    <HealthcareComponent />
 );
 
 export const Transport = () => (
