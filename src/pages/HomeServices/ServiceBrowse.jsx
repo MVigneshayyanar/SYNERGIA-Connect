@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Star, MapPin, Clock, DollarSign } from 'lucide-react';
+import { MagnifyingGlass, Star, MapPin, Clock, CurrencyDollar, CheckCircle, Wrench, Lightning, Broom, PaintBrush, Hammer } from '@phosphor-icons/react';
+import BackButton from '../../components/BackButton';
 
 const ServiceBrowse = () => {
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const categories = [
-        { name: 'All', icon: '🏠', count: 45 },
-        { name: 'Plumbing', icon: '🔧', count: 12 },
-        { name: 'Electrical', icon: '⚡', count: 8 },
-        { name: 'Cleaning', icon: '🧹', count: 15 },
-        { name: 'Painting', icon: '🎨', count: 6 },
-        { name: 'Carpentry', icon: '🪚', count: 4 }
+        { name: 'All', icon: '🏠', count: 45, IconComponent: null },
+        { name: 'Plumbing', icon: '🔧', count: 12, IconComponent: Wrench },
+        { name: 'Electrical', icon: '⚡', count: 8, IconComponent: Lightning },
+        { name: 'Cleaning', icon: '🧹', count: 15, IconComponent: Broom },
+        { name: 'Painting', icon: '🎨', count: 6, IconComponent: PaintBrush },
+        { name: 'Carpentry', icon: '🪚', count: 4, IconComponent: Hammer }
     ];
 
     const providers = [
         {
             id: 1,
             name: "Rajesh Kumar",
-            profession: "Plumber",
+            profession: "Plumbing",
             rating: 4.8,
             reviews: 127,
             hourlyRate: "₹500",
@@ -31,7 +33,7 @@ const ServiceBrowse = () => {
         {
             id: 2,
             name: "Priya Sharma",
-            profession: "Electrician",
+            profession: "Electrical",
             rating: 4.9,
             reviews: 203,
             hourlyRate: "₹600",
@@ -57,7 +59,7 @@ const ServiceBrowse = () => {
         {
             id: 4,
             name: "Sneha Reddy",
-            profession: "Painter",
+            profession: "Painting",
             rating: 4.6,
             reviews: 64,
             hourlyRate: "₹550",
@@ -74,39 +76,48 @@ const ServiceBrowse = () => {
         : providers.filter(p => p.profession === selectedCategory);
 
     return (
-        <div className="space-y-6">
+        <div className="min-h-full">
             {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Home Services</h1>
-                <p className="text-gray-600 mt-1">Find verified professionals for your home</p>
+            <div className="mb-8">
+                <div className="flex items-center gap-4 mb-4">
+                    <BackButton to="/housing" label="Housing Hub" />
+                </div>
+                <h1 className="text-3xl font-bold text-slate-900">Home Services</h1>
+                <p className="text-slate-500 mt-1">Find verified professionals for your home</p>
             </div>
 
             {/* Search Bar */}
-            <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                    type="text"
-                    placeholder="Search for services or professionals..."
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
+                <div className="relative">
+                    <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search for services or professionals..."
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                    />
+                </div>
             </div>
 
             {/* Categories */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Service Categories</h2>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
+                <h2 className="text-lg font-bold text-slate-900 mb-4">Service Categories</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     {categories.map((category) => (
                         <button
                             key={category.name}
                             onClick={() => setSelectedCategory(category.name)}
-                            className={`p-4 rounded-lg border-2 transition-all text-center ${selectedCategory === category.name
-                                    ? 'border-blue-600 bg-blue-50'
-                                    : 'border-gray-200 hover:border-gray-300'
+                            className={`p-4 rounded-xl border-2 transition-all text-center ${selectedCategory === category.name
+                                ? 'border-[#FF6347] bg-[#FF6347]/5'
+                                : 'border-slate-200 hover:border-[#FF6347]/50'
                                 }`}
                         >
                             <div className="text-3xl mb-2">{category.icon}</div>
-                            <div className="font-medium text-gray-900">{category.name}</div>
-                            <div className="text-xs text-gray-500">{category.count} providers</div>
+                            <div className={`font-semibold ${selectedCategory === category.name ? 'text-[#FF6347]' : 'text-slate-900'}`}>
+                                {category.name}
+                            </div>
+                            <div className="text-xs text-slate-500">{category.count} providers</div>
                         </button>
                     ))}
                 </div>
@@ -114,11 +125,11 @@ const ServiceBrowse = () => {
 
             {/* Providers Grid */}
             <div>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-slate-900">
                         {selectedCategory === 'All' ? 'All Professionals' : `${selectedCategory} Professionals`}
                     </h2>
-                    <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select className="px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] outline-none">
                         <option>Sort by: Recommended</option>
                         <option>Highest Rated</option>
                         <option>Lowest Price</option>
@@ -126,72 +137,72 @@ const ServiceBrowse = () => {
                     </select>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredProviders.map((provider) => (
                         <Link
                             key={provider.id}
                             to={`/home-services/provider/${provider.id}`}
-                            className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all group"
+                            className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-xl hover:border-[#FF6347]/20 transition-all duration-300 group"
                         >
                             {/* Provider Image */}
                             <div className="relative h-48 overflow-hidden">
                                 <img
                                     src={provider.image}
                                     alt={provider.name}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
                                 {provider.verified && (
-                                    <div className="absolute top-3 right-3 px-3 py-1 bg-green-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
-                                        ✓ Verified
+                                    <div className="absolute top-3 right-3 px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
+                                        <CheckCircle size={12} weight="bold" />
+                                        Verified
                                     </div>
                                 )}
-                                <div className="absolute bottom-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium">
+                                <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full text-sm font-semibold text-slate-700">
                                     {provider.profession}
                                 </div>
                             </div>
 
                             {/* Provider Info */}
-                            <div className="p-4">
-                                <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                            <div className="p-5">
+                                <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-[#FF6347] transition-colors">
                                     {provider.name}
                                 </h3>
 
                                 <div className="flex items-center gap-2 mb-3">
                                     <div className="flex items-center gap-1">
-                                        <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                                        <span className="font-semibold text-gray-900">{provider.rating}</span>
+                                        <Star size={16} weight="fill" className="text-amber-400" />
+                                        <span className="font-bold text-slate-900">{provider.rating}</span>
                                     </div>
-                                    <span className="text-sm text-gray-600">({provider.reviews} reviews)</span>
+                                    <span className="text-sm text-slate-500">({provider.reviews} reviews)</span>
                                 </div>
 
-                                <div className="flex items-center text-gray-600 text-sm mb-2">
+                                <div className="flex items-center text-slate-500 text-sm mb-2">
                                     <MapPin size={14} className="mr-1" />
                                     {provider.location}
                                 </div>
 
-                                <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center text-sm">
-                                        <Clock size={14} className="mr-1 text-green-600" />
+                                        <Clock size={14} className="mr-1 text-green-500" />
                                         <span className="text-green-600 font-medium">{provider.availability}</span>
                                     </div>
-                                    <div className="flex items-center font-bold text-blue-600">
-                                        <DollarSign size={16} />
+                                    <div className="flex items-center font-bold text-[#FF6347]">
                                         <span>{provider.hourlyRate}/hr</span>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap gap-1 mb-3">
+                                <div className="flex flex-wrap gap-1.5 mb-4">
                                     {provider.skills.slice(0, 3).map((skill, index) => (
                                         <span
                                             key={index}
-                                            className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                                            className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full"
                                         >
                                             {skill}
                                         </span>
                                     ))}
                                 </div>
 
-                                <button className="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                                <button className="w-full py-2.5 bg-[#FF6347] text-white font-semibold rounded-xl hover:bg-[#E55A3C] transition-colors">
                                     View Profile
                                 </button>
                             </div>

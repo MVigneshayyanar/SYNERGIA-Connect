@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
     SquaresFour,
     Student,
@@ -6,17 +7,27 @@ import {
     House,
     Gear,
     SignOut,
+    List,
+    X,
 } from "@phosphor-icons/react";
-import { NavLink, Link, useNavigate } from "react-router-dom";
-import * as Avatar from "@radix-ui/react-avatar"; // Radix UI Avatar
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
+import * as Avatar from "@radix-ui/react-avatar";
 import { useAuth } from "../context/AuthContext";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onToggle }) => {
     const { logout, userProfile } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Close sidebar on route change (mobile)
+    useEffect(() => {
+        if (window.innerWidth < 768 && isOpen) {
+            onToggle?.(false);
+        }
+    }, [location.pathname]);
 
     const handleLogout = async (e) => {
-        e.preventDefault(); // Prevent link navigation if inside link, though button is outside or nested
+        e.preventDefault();
         try {
             await logout();
             navigate("/login");
@@ -33,82 +44,134 @@ const Sidebar = () => {
         { icon: House, label: "Housing", path: "/housing" },
     ];
 
+    // Check if Housing sub-page is active
+    const isHousingSubPage = (path) => {
+        return path === '/housing' && (
+            location.pathname.startsWith('/marketplace') ||
+            location.pathname.startsWith('/property-management') ||
+            location.pathname.startsWith('/home-services') ||
+            location.pathname.startsWith('/post-property')
+        );
+    };
+
     return (
-        <aside className="h-screen w-64 bg-slate-900 text-white flex flex-col font-sans border-r border-slate-800 shadow-xl fixed left-0 top-0 z-50">
-            {/* Logo Area */}
-            <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950/50 backdrop-blur-sm">
-                <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-blue-500 rounded-lg mr-3 flex items-center justify-center shadow-lg shadow-teal-500/20">
-                    <span className="font-bold text-white text-lg">S</span>
-                </div>
-                <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                    SYNERGIA
-                </span>
-            </div>
+        <>
+            {/* Mobile Overlay */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/30 z-40 md:hidden backdrop-blur-sm"
+                    onClick={() => onToggle?.(false)}
+                />
+            )}
 
-            {/* Navigation */}
-            <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
-                <div className="px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Main Menu
-                </div>
-                {navItems.map((item) => (
-                    <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) =>
-                            `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group ${isActive
-                                ? "bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-[0_0_15px_-3px_rgba(45,212,191,0.2)]"
-                                : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
-                            }`
-                        }
-                    >
-                        <item.icon
-                            size={22}
-                            weight="duotone"
-                            className="mr-3 transition-transform group-hover:scale-110"
-                        />
-                        <span className="font-medium">{item.label}</span>
-                    </NavLink>
-                ))}
-            </nav>
-
-            {/* User Profile / Settings */}
-            <div className="p-4 border-t border-slate-800 bg-slate-950/30">
-                <button className="flex items-center w-full px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors mb-2">
-                    <Gear size={20} weight="duotone" className="mr-3" />
-                    <span className="text-sm font-medium">Settings</span>
-                </button>
-
-                <div className="flex items-center p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 mt-2 hover:bg-slate-800 transition-colors group relative">
-                    <Link to="/profile" className="flex items-center flex-1 min-w-0">
-                        <Avatar.Root className="h-9 w-9 rounded-full bg-teal-600 flex items-center justify-center overflow-hidden border border-slate-600 group-hover:border-teal-500 transition-colors shrink-0">
-                            {userProfile?.photoUrl ? (
-                                <Avatar.Image src={userProfile.photoUrl} className="h-full w-full object-cover" />
-                            ) : (
-                                <Avatar.Fallback className="text-white text-xs font-bold">
-                                    {userProfile?.name ? userProfile.name.slice(0, 2).toUpperCase() : "JD"}
-                                </Avatar.Fallback>
-                            )}
-                        </Avatar.Root>
-                        <div className="ml-3 flex-1 overflow-hidden">
-                            <p className="text-sm font-medium text-white truncate">
-                                {userProfile?.name || "User"}
-                            </p>
-                            <p className="text-xs text-slate-400 truncate">
-                                {userProfile?.verificationStatus === 'verified' ? 'Verified' : 'Member'}
-                            </p>
+            {/* Sidebar - White theme with coral accents */}
+            <aside className={`
+                h-screen w-64 bg-white text-slate-800 flex flex-col font-sans border-r border-slate-200 shadow-xl
+                fixed left-0 top-0 z-50
+                transition-transform duration-300 ease-in-out
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+                md:translate-x-0
+            `}>
+                {/* Logo Area */}
+                <div className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-100 bg-white">
+                    <div className="flex items-center">
+                        <div className="w-9 h-9 bg-gradient-to-br from-[#FF6347] to-[#FF8C69] rounded-xl mr-3 flex items-center justify-center shadow-lg shadow-[#FF6347]/20">
+                            <span className="font-bold text-white text-lg">S</span>
                         </div>
-                    </Link>
+                        <span className="font-bold text-xl tracking-tight text-slate-900">
+                            SYNERGIA
+                        </span>
+                    </div>
+                    {/* Close button for mobile */}
                     <button
-                        onClick={handleLogout}
-                        className="p-2 text-slate-400 hover:text-red-400 transition-colors ml-1 z-10"
-                        title="Sign Out"
+                        onClick={() => onToggle?.(false)}
+                        className="md:hidden p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
                     >
-                        <SignOut size={20} />
+                        <X size={20} />
                     </button>
                 </div>
-            </div>
-        </aside>
+
+                {/* Navigation */}
+                <nav className="flex-1 py-4 md:py-6 px-3 space-y-1 overflow-y-auto">
+                    <div className="px-3 mb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Main Menu
+                    </div>
+                    {navItems.map((item) => {
+                        const isSubPage = isHousingSubPage(item.path);
+
+                        return (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                onClick={() => window.innerWidth < 768 && onToggle?.(false)}
+                                className={({ isActive }) =>
+                                    `flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group ${(isActive || isSubPage)
+                                        ? "bg-[#FF6347] text-white shadow-lg shadow-[#FF6347]/25"
+                                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                    }`
+                                }
+                            >
+                                <item.icon
+                                    size={22}
+                                    weight="duotone"
+                                    className="mr-3 transition-transform group-hover:scale-110"
+                                />
+                                <span className="font-semibold">{item.label}</span>
+                            </NavLink>
+                        );
+                    })}
+                </nav>
+
+                {/* User Profile / Settings */}
+                <div className="p-3 md:p-4 border-t border-slate-100 bg-slate-50/50">
+                    <button className="flex items-center w-full px-3 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors mb-2">
+                        <Gear size={20} weight="duotone" className="mr-3 text-slate-400" />
+                        <span className="text-sm font-medium">Settings</span>
+                    </button>
+
+                    <div className="flex items-center p-2 md:p-3 rounded-xl bg-white border border-slate-200 mt-2 hover:border-[#FF6347]/30 transition-colors group relative shadow-sm">
+                        <Link to="/profile" onClick={() => window.innerWidth < 768 && onToggle?.(false)} className="flex items-center flex-1 min-w-0">
+                            <Avatar.Root className="h-9 w-9 rounded-full bg-gradient-to-br from-[#FF6347] to-[#FF8C69] flex items-center justify-center overflow-hidden border-2 border-white shadow-md shrink-0">
+                                {userProfile?.photoUrl ? (
+                                    <Avatar.Image src={userProfile.photoUrl} className="h-full w-full object-cover" />
+                                ) : (
+                                    <Avatar.Fallback className="text-white text-xs font-bold">
+                                        {userProfile?.name ? userProfile.name.slice(0, 2).toUpperCase() : "JD"}
+                                    </Avatar.Fallback>
+                                )}
+                            </Avatar.Root>
+                            <div className="ml-2 md:ml-3 flex-1 overflow-hidden">
+                                <p className="text-sm font-semibold text-slate-900 truncate">
+                                    {userProfile?.name || "User"}
+                                </p>
+                                <p className="text-xs text-slate-500 truncate">
+                                    {userProfile?.verificationStatus === 'verified' ? '✓ Verified' : 'Member'}
+                                </p>
+                            </div>
+                        </Link>
+                        <button
+                            onClick={handleLogout}
+                            className="p-2 text-slate-400 hover:text-red-500 transition-colors ml-1 z-10 rounded-lg hover:bg-red-50"
+                            title="Sign Out"
+                        >
+                            <SignOut size={20} />
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </>
     );
 };
+
+// Mobile hamburger button component
+export const MobileMenuButton = ({ onClick }) => (
+    <button
+        onClick={onClick}
+        className="md:hidden p-2 text-slate-600 hover:text-[#FF6347] hover:bg-[#FF6347]/5 rounded-lg transition-colors"
+        aria-label="Open menu"
+    >
+        <List size={24} />
+    </button>
+);
 
 export default Sidebar;

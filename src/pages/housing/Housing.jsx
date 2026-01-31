@@ -2,7 +2,9 @@ import {
     Storefront,
     Buildings,
     Wrench,
-    ArrowRight
+    ArrowRight,
+    User,
+    Plus
 } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 
@@ -12,31 +14,46 @@ const Housing = () => {
             id: "marketplace",
             title: "Marketplace",
             icon: Storefront,
-            color: "text-blue-500",
-            bg: "bg-blue-50",
-            border: "hover:border-blue-200",
-            desc: "Interactive map search, advanced filters & 3D virtual tours.",
+            color: "text-[#FF6347]",
+            bg: "bg-[#FF6347]/10",
+            border: "hover:border-[#FF6347]/30",
+            desc: "Browse properties, post listings & find your perfect home.",
             path: "/marketplace"
         },
         {
             id: "property-management",
             title: "Property Management",
             icon: Buildings,
-            color: "text-purple-500",
-            bg: "bg-purple-50",
-            border: "hover:border-purple-200",
-            desc: "Tenant dashboard, rent payments & maintenance requests.",
+            color: "text-[#FF6347]",
+            bg: "bg-[#FF6347]/10",
+            border: "hover:border-[#FF6347]/30",
+            desc: "Manage tenants, pay rent & track maintenance requests.",
             path: "/property-management/tenant"
         },
         {
             id: "home-services",
             title: "Home Services",
             icon: Wrench,
-            color: "text-teal-500",
-            bg: "bg-teal-50",
-            border: "hover:border-teal-200",
-            desc: "On-demand verified professionals & real-time booking.",
+            color: "text-[#FF6347]",
+            bg: "bg-[#FF6347]/10",
+            border: "hover:border-[#FF6347]/30",
+            desc: "Book verified professionals for repairs & home care.",
             path: "/home-services"
+        }
+    ];
+
+    const quickActions = [
+        {
+            icon: Plus,
+            label: "Post Property",
+            path: "/post-property",
+            primary: true
+        },
+        {
+            icon: User,
+            label: "Landlord Dashboard",
+            path: "/property-management/landlord",
+            primary: false
         }
     ];
 
@@ -45,6 +62,23 @@ const Housing = () => {
             <div className="mb-10">
                 <h1 className="text-3xl font-bold text-slate-900">Housing Hub</h1>
                 <p className="text-slate-500 mt-2 text-lg">One unified platform for all your real estate needs.</p>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-3 mb-8">
+                {quickActions.map((action) => (
+                    <Link
+                        key={action.label}
+                        to={action.path}
+                        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all ${action.primary
+                                ? 'bg-[#FF6347] text-white hover:bg-[#E55A3C] shadow-lg shadow-[#FF6347]/20'
+                                : 'bg-white text-slate-700 border border-slate-200 hover:border-[#FF6347] hover:text-[#FF6347]'
+                            }`}
+                    >
+                        <action.icon size={20} weight="bold" />
+                        {action.label}
+                    </Link>
+                ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -61,7 +95,7 @@ const Housing = () => {
                             <div className={`w-16 h-16 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mb-6 shadow-sm`}>
                                 <item.icon size={32} weight="duotone" />
                             </div>
-                            <h3 className="text-2xl font-bold text-slate-900 mb-3">{item.title}</h3>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-[#FF6347] transition-colors">{item.title}</h3>
                             <p className="text-slate-500 leading-relaxed">{item.desc}</p>
                         </div>
 
