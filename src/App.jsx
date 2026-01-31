@@ -25,6 +25,9 @@ import ServiceBrowse from "./pages/HomeServices/ServiceBrowse";
 import ProviderProfile from "./pages/HomeServices/ProviderProfile";
 import BookingCalendar from "./pages/HomeServices/BookingCalendar";
 
+// Housing
+import PostProperty from "./pages/housing/PostProperty";
+
 function App() {
   return (
     <AccessibilityProvider>
@@ -48,6 +51,7 @@ function App() {
                 {/* Marketplace */}
                 <Route path="marketplace" element={<PropertySearch />} />
                 <Route path="marketplace/property/:id" element={<PropertyDetails />} />
+                <Route path="post-property" element={<PostProperty />} />
 
                 {/* Property Management */}
                 <Route path="property-management/tenant" element={<TenantDashboard />} />

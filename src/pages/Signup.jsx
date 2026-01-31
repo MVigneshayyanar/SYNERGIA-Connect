@@ -44,38 +44,47 @@ const Signup = () => {
             return setError("Passwords do not match");
         }
 
-        if (!documentFile) {
-            return setError("Please upload a profession document for verification");
+        if (formData.password.length < 6) {
+            return setError("Password must be at least 6 characters");
         }
 
         try {
             setError('');
             setLoading(true);
 
-            // 1. Create Authentication User FIRST (To establish identity)
+            // 1. Create Authentication User FIRST
             const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
             const user = userCredential.user;
 
-            // 2. Upload Document (Now we are authenticated, so Storage rules should pass)
-            const storageRef = ref(storage, `profession_docs/${user.uid}_${documentFile.name}`);
-            await uploadBytes(storageRef, documentFile);
-            const docUrl = await getDownloadURL(storageRef);
+            // 2. Upload Document if provided (optional now)
+            let docUrl = "";
+            if (documentFile) {
+                try {
+                    const storageRef = ref(storage, `profession_docs/${user.uid}_${documentFile.name}`);
+                    await uploadBytes(storageRef, documentFile);
+                    docUrl = await getDownloadURL(storageRef);
+                } catch (uploadError) {
+                    console.error("Document upload failed:", uploadError);
+                    // Continue without document - not critical
+                }
+            }
 
             // 3. Determine verification status
-            const verificationStatus = parseInt(formData.experience) >= 2 ? "verified" : "pending";
+            const experience = parseInt(formData.experience) || 0;
+            const verificationStatus = experience >= 2 ? "verified" : "pending";
 
             // 4. Create User Profile Data in Firestore
             const userProfile = {
                 uid: user.uid,
                 email: formData.email,
-                name: formData.name,
-                dob: formData.dob,
-                gender: formData.gender,
-                phone: formData.phone,
-                age: formData.age,
-                profession: formData.profession,
-                experience: formData.experience,
-                photoUrl: "https://via.placeholder.com/150", // Default avatar
+                name: formData.name || formData.email.split('@')[0], // Use email prefix if no name
+                dob: formData.dob || "",
+                gender: formData.gender !== 'select' ? formData.gender : "",
+                phone: formData.phone || "",
+                age: formData.age || "",
+                profession: formData.profession || "Not specified",
+                experience: formData.experience || "",
+                photoUrl: "", // Default empty
                 professionDocUrl: docUrl,
                 verificationStatus: verificationStatus,
                 createdAt: new Date().toISOString(),
@@ -87,12 +96,27 @@ const Signup = () => {
                 }
             };
 
-            await setDoc(doc(db, "users", user.uid), userProfile);
+            try {
+                await setDoc(doc(db, "users", user.uid), userProfile);
+                console.log("Profile created successfully");
+            } catch (firestoreError) {
+                console.error("Firestore write failed:", firestoreError);
+                // User is still created in Auth, they can still use the app
+                // The AuthContext will create a basic profile on next login
+            }
 
             navigate("/"); // Redirect to dashboard
         } catch (err) {
-            console.error(err);
-            setError("Failed to create an account: " + err.message);
+            console.error("Signup error:", err);
+            if (err.code === 'auth/email-already-in-use') {
+                setError("This email is already registered. Please login instead.");
+            } else if (err.code === 'auth/weak-password') {
+                setError("Password is too weak. Please use a stronger password.");
+            } else if (err.code === 'auth/invalid-email') {
+                setError("Invalid email address.");
+            } else {
+                setError("Failed to create account: " + err.message);
+            }
         } finally {
             setLoading(false);
         }
@@ -122,7 +146,7 @@ const Signup = () => {
                             <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 text-slate-400" size={20} />
-                                <input name="name" type="text" required onChange={handleChange} className="pl-10 w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="John Doe" />
+                                <input name="name" type="text" onChange={handleChange} className="pl-10 w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="John Doe (optional)" />
                             </div>
                         </div>
 
@@ -130,13 +154,13 @@ const Signup = () => {
                             <label className="block text-sm font-medium text-slate-700 mb-1">Date of Birth</label>
                             <div className="relative">
                                 <Calendar className="absolute left-3 top-3 text-slate-400" size={20} />
-                                <input name="dob" type="date" required onChange={handleChange} className="pl-10 w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" />
+                                <input name="dob" type="date" onChange={handleChange} className="pl-10 w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" />
                             </div>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Gender</label>
-                            <select name="gender" required onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700">
+                            <select name="gender" onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700">
                                 <option value="select">Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -146,14 +170,14 @@ const Signup = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Age</label>
-                            <input name="age" type="number" required onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="Age" />
+                            <input name="age" type="number" onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="Age (optional)" />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
                             <div className="relative">
                                 <Phone className="absolute left-3 top-3 text-slate-400" size={20} />
-                                <input name="phone" type="tel" required onChange={handleChange} className="pl-10 w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="+1 234 567 890" />
+                                <input name="phone" type="tel" onChange={handleChange} className="pl-10 w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="+1 234 567 890 (optional)" />
                             </div>
                         </div>
 
@@ -173,22 +197,22 @@ const Signup = () => {
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Profession</label>
                                 <div className="relative">
                                     <Briefcase className="absolute left-3 top-3 text-slate-400" size={20} />
-                                    <input name="profession" type="text" required onChange={handleChange} className="pl-10 w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="Software Engineer" />
+                                    <input name="profession" type="text" onChange={handleChange} className="pl-10 w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="Software Engineer (optional)" />
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Experience (Years)</label>
-                                <input name="experience" type="number" required onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="Exp. Years" />
+                                <input name="experience" type="number" onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="Years (optional)" />
                             </div>
 
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Profession Document (ID/Certificate)</label>
                                 <div className="relative border-2 border-dashed border-slate-300 rounded-lg p-6 hover:bg-slate-50 transition-colors text-center cursor-pointer">
-                                    <input type="file" required onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png" />
+                                    <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png" />
                                     <FileText className="mx-auto text-slate-400 mb-2" size={32} />
                                     <p className="text-sm text-slate-600">
-                                        {documentFile ? documentFile.name : "Click or drag to upload verification document"}
+                                        {documentFile ? documentFile.name : "Click or drag to upload (optional)"}
                                     </p>
                                     <p className="text-xs text-slate-400 mt-1">PDF, JPG or PNG (Max 5MB)</p>
                                 </div>
