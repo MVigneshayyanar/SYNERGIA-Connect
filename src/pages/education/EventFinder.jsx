@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { CalendarPlus, MapPin, Users, Ticket, CaretLeft, CaretRight, Plus, X, Trash } from "@phosphor-icons/react";
 import { db, storage, auth } from "../../firebase";
-import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, increment, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -10,6 +10,8 @@ const EventFinder = () => {
     const [showPostModal, setShowPostModal] = useState(false);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showRegistrationsModal, setShowRegistrationsModal] = useState(false);
+    const [registrationsList, setRegistrationsList] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -17,10 +19,11 @@ const EventFinder = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const locationInputRef = useRef(null);
+    const collegeInputRef = useRef(null);
 
     // Load Google Maps Script
     useEffect(() => {
-        const apiKey = import.meta.env.VITE_LOCATION_FINDER; 
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY; 
         
         if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
             const script = document.createElement("script");
@@ -49,6 +52,26 @@ const EventFinder = () => {
             });
         }
     }, [showPostModal]);
+
+    // Initialize Autocomplete for College Input
+    useEffect(() => {
+        if (showRegisterModal && window.google && collegeInputRef.current) {
+            const autocomplete = new window.google.maps.places.Autocomplete(collegeInputRef.current, {
+                types: ['establishment'],
+                fields: ['name', 'formatted_address']
+            });
+
+            autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+                if (place.name) {
+                     setRegisterData(prev => ({ 
+                         ...prev, 
+                         college: place.name
+                     }));
+                }
+            });
+        }
+    }, [showRegisterModal]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -129,11 +152,43 @@ const EventFinder = () => {
         setRegisterData({ ...registerData, [name]: value });
     };
 
-    const handleRegisterSubmit = (e) => {
+    const handleRegisterSubmit = async (e) => {
         e.preventDefault();
-        alert(`Successfully registered for ${selectedEvent.title}!`);
-        setShowRegisterModal(false);
-        setRegisterData({ name: "", email: "", college: "", year: "", department: "" });
+        try {
+            // 1. Add registration to 'registrations' subcollection
+            await addDoc(collection(db, "events", selectedEvent.id, "registrations"), {
+                ...registerData,
+                submittedAt: serverTimestamp(),
+                userId: currentUser ? currentUser.uid : "anonymous"
+            });
+
+            // 2. Increment attendees count on the event document
+            const eventRef = doc(db, "events", selectedEvent.id);
+            await updateDoc(eventRef, {
+                attendees: increment(1)
+            });
+
+            alert(`Successfully registered for ${selectedEvent.title}!`);
+            setShowRegisterModal(false);
+            setRegisterData({ name: "", email: "", college: "", year: "", department: "" });
+        } catch (error) {
+            console.error("Error registering:", error);
+            alert("Failed to register. Please try again.");
+        }
+    };
+
+    const handleViewRegistrations = async (event) => {
+        setSelectedEvent(event);
+        try {
+            const q = query(collection(db, "events", event.id, "registrations"), orderBy("submittedAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            const regs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setRegistrationsList(regs);
+            setShowRegistrationsModal(true);
+        } catch (error) {
+            console.error("Error fetching registrations:", error);
+            alert("Failed to load registrations.");
+        }
     };
 
     const handlePostEvent = async (e) => {
@@ -501,7 +556,13 @@ const EventFinder = () => {
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">College Name</label>
                                 <input 
-                                    name="college" required value={registerData.college} onChange={handleRegisterChange} type="text" placeholder="University of Technology" 
+                                    name="college" 
+                                    ref={collegeInputRef}
+                                    required 
+                                    value={registerData.college} 
+                                    onChange={handleRegisterChange} 
+                                    type="text" 
+                                    placeholder="Search for University/College..." 
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
                                 />
                             </div>
@@ -532,6 +593,57 @@ const EventFinder = () => {
                                 Confirm Registration
                             </button>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Registrations List Modal (Owner Only) */}
+            {showRegistrationsModal && selectedEvent && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden animate-scale-in max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800">Registered Users</h3>
+                                <p className="text-xs text-slate-500 mt-1">Event: <span className="font-bold text-blue-600">{selectedEvent.title}</span></p>
+                            </div>
+                            <button onClick={() => setShowRegistrationsModal(false)} className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50">
+                                <X size={20} weight="bold" />
+                            </button>
+                        </div>
+                        <div className="p-0 overflow-y-auto">
+                            {registrationsList.length === 0 ? (
+                                <div className="p-12 text-center text-slate-400">
+                                    <Users size={48} className="mx-auto mb-3 opacity-20" />
+                                    <p>No registrations yet.</p>
+                                </div>
+                            ) : (
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="bg-slate-50 sticky top-0 z-10">
+                                        <tr>
+                                            <th className="p-4 text-xs font-bold text-slate-500 uppercase border-b border-slate-100">Name</th>
+                                            <th className="p-4 text-xs font-bold text-slate-500 uppercase border-b border-slate-100">Email</th>
+                                            <th className="p-4 text-xs font-bold text-slate-500 uppercase border-b border-slate-100">College</th>
+                                            <th className="p-4 text-xs font-bold text-slate-500 uppercase border-b border-slate-100">Dept/Year</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {registrationsList.map((reg) => (
+                                            <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="p-4 text-sm font-bold text-slate-700">{reg.name}</td>
+                                                <td className="p-4 text-sm text-slate-600">{reg.email}</td>
+                                                <td className="p-4 text-sm text-slate-600">{reg.college}</td>
+                                                <td className="p-4 text-sm text-slate-500">{reg.department} <span className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-400 ml-1">Yr {reg.year}</span></td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                        <div className="p-4 border-t border-slate-100 bg-slate-50/30 flex justify-end shrink-0">
+                            <button onClick={() => setShowRegistrationsModal(false)} className="px-6 py-2 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300 transition-colors">
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -594,15 +706,24 @@ const EventFinder = () => {
                                     <Ticket className="mr-2" size={16} weight="bold"/> Register
                                  </button>
                                  
-                                 {/* Delete Button for Owner */}
-                                 {currentUser && (evt.userId === currentUser.uid || !evt.userId) && (
-                                     <button 
-                                        onClick={(e) => { e.stopPropagation(); handleDeleteEvent(evt); }}
-                                        className="mt-2 md:mt-4 p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors flex items-center justify-center border border-transparent hover:border-red-100"
-                                        title="Delete Event"
-                                     >
-                                        <Trash size={20} weight="bold" />
-                                     </button>
+                                 {/* Buttons for Owner */}
+                                 {currentUser && evt.userId === currentUser.uid && (
+                                     <div className="flex gap-2">
+                                         <button 
+                                            onClick={(e) => { e.stopPropagation(); handleViewRegistrations(evt); }}
+                                            className="mt-2 md:mt-4 p-2 w-full text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors flex items-center justify-center text-xs font-bold"
+                                            title="View Registrations"
+                                         >
+                                            <Users size={16} weight="bold" className="mr-1" /> View Registrations
+                                         </button>
+                                         <button 
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteEvent(evt); }}
+                                            className="mt-2 md:mt-4 p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors flex items-center justify-center border border-transparent hover:border-red-100"
+                                            title="Delete Event"
+                                         >
+                                            <Trash size={20} weight="bold" />
+                                         </button>
+                                     </div>
                                  )}
                             </div>
                         </div>

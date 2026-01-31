@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Bed, Bathtub, Ruler, CurrencyDollar, Image, Upload, House, CheckCircle } from '@phosphor-icons/react';
+import { MapPin, Bed, Bathtub, Ruler, House, CheckCircle } from '@phosphor-icons/react';
 import BackButton from '../../components/BackButton';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
@@ -114,7 +114,7 @@ const PostProperty = () => {
     }
 
     return (
-        <div className="min-h-full max-w-4xl mx-auto">
+        <div className="min-h-full max-w-4xl mx-auto animate-fade-in">
             {/* Header */}
             <div className="mb-8">
                 <div className="flex items-center gap-4 mb-4">
@@ -134,7 +134,7 @@ const PostProperty = () => {
                 {/* Basic Info */}
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                     <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <House size={24} className="text-[#FF6347]" weight="duotone" />
+                        <House size={24} className="text-blue-600" weight="duotone" />
                         Basic Information
                     </h2>
 
@@ -149,7 +149,7 @@ const PostProperty = () => {
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="e.g., Modern 3BHK Apartment in Koramangala"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                                 required
                             />
                         </div>
@@ -164,7 +164,7 @@ const PostProperty = () => {
                                 onChange={handleChange}
                                 rows="4"
                                 placeholder="Describe your property..."
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none resize-none"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none resize-none"
                             />
                         </div>
 
@@ -177,7 +177,7 @@ const PostProperty = () => {
                                     name="type"
                                     value={formData.type}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                                 >
                                     {propertyTypes.map(type => (
                                         <option key={type.value} value={type.value}>{type.label}</option>
@@ -197,14 +197,14 @@ const PostProperty = () => {
                                         value={formData.price}
                                         onChange={handleChange}
                                         placeholder="45000"
-                                        className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                                        className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                                         required
                                     />
                                     <select
                                         name="period"
                                         value={formData.period}
                                         onChange={handleChange}
-                                        className="px-3 bg-slate-50 border border-l-0 border-slate-200 rounded-r-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                                        className="px-3 bg-slate-50 border border-l-0 border-slate-200 rounded-r-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                                     >
                                         <option value="month">/month</option>
                                         <option value="year">/year</option>
@@ -219,7 +219,7 @@ const PostProperty = () => {
                 {/* Location */}
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                     <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <MapPin size={24} className="text-[#FF6347]" weight="duotone" />
+                        <MapPin size={24} className="text-blue-600" weight="duotone" />
                         Location
                     </h2>
 
@@ -234,7 +234,7 @@ const PostProperty = () => {
                                 value={formData.location}
                                 onChange={handleChange}
                                 placeholder="e.g., Koramangala, Bangalore"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                                 required
                             />
                         </div>
@@ -249,7 +249,7 @@ const PostProperty = () => {
                                 onChange={handleChange}
                                 rows="2"
                                 placeholder="Enter complete address"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none resize-none"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none resize-none"
                             />
                         </div>
                     </div>
@@ -268,7 +268,7 @@ const PostProperty = () => {
                                 name="bedrooms"
                                 value={formData.bedrooms}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                             >
                                 {[1, 2, 3, 4, 5, '6+'].map(num => (
                                     <option key={num} value={num}>{num}</option>
@@ -284,7 +284,7 @@ const PostProperty = () => {
                                 name="bathrooms"
                                 value={formData.bathrooms}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                             >
                                 {[1, 2, 3, 4, '5+'].map(num => (
                                     <option key={num} value={num}>{num}</option>
@@ -302,7 +302,7 @@ const PostProperty = () => {
                                 value={formData.area}
                                 onChange={handleChange}
                                 placeholder="e.g., 1200"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6347]/20 focus:border-[#FF6347] transition-all outline-none"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                             />
                         </div>
                     </div>
@@ -318,7 +318,7 @@ const PostProperty = () => {
                                 type="button"
                                 onClick={() => toggleAmenity(amenity)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${formData.amenities.includes(amenity)
-                                        ? 'bg-[#FF6347] text-white'
+                                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                     }`}
                             >
@@ -340,7 +340,7 @@ const PostProperty = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 px-6 py-3 bg-[#FF6347] text-white font-bold rounded-xl hover:bg-[#E55A3C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#FF6347]/20"
+                        className="flex-1 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20"
                     >
                         {loading ? 'Posting...' : 'Post Property'}
                     </button>
