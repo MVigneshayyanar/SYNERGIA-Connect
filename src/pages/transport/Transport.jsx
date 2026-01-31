@@ -77,7 +77,7 @@ const LocationInput = ({ placeholder, value, onChange, icon, ringColor }) => {
             <input
                 type="text"
                 placeholder={placeholder}
-                className={`w-full pl-16 pr-4 py-4 bg-slate-50 border-0 rounded-xl focus:ring-2 ${ringColor} font-medium transition-all`}
+                className={`w-full pl-16 pr-4 py-4 bg-slate-50 border-0 rounded-xl focus:ring-2 ${ringColor} font-normal transition-all`}
                 value={value}
                 onChange={handleInput}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
@@ -233,16 +233,8 @@ const BusSchedule = ({ onBack }) => {
     );
 
     return (
-        <div className="animate-fade-in max-w-4xl mx-auto">
-            <div className="flex items-center mb-6">
-                <button
-                    onClick={onBack}
-                    className="mr-4 p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors"
-                >
-                    <ArrowLeft size={20} />
-                </button>
-                <h2 className="text-2xl font-bold text-slate-900">Bus Services</h2>
-            </div>
+        <div className="animate-fade-in max-w-4xl mx-auto" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">Bus Services</h2>
 
             {/* Tabs */}
             <div className="flex bg-slate-100 p-1.5 rounded-xl mb-8 w-fit">
@@ -317,15 +309,15 @@ const BusSchedule = ({ onBack }) => {
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="relative">
                                         <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-1 block">From</label>
-                                        <input required placeholder="Enter City" className="w-full p-3 bg-slate-50 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+                                        <input required placeholder="Enter City" className="w-full p-3 bg-slate-50 rounded-xl  text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
                                     </div>
                                     <div className="relative">
                                         <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-1 block">To</label>
-                                        <input required placeholder="Enter City" className="w-full p-3 bg-slate-50 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+                                        <input required placeholder="Enter City" className="w-full p-3 bg-slate-50 rounded-xl ate-800 outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
                                     </div>
                                     <div className="relative">
                                         <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-1 block">Travel Date</label>
-                                        <input required type="date" className="w-full p-3 bg-slate-50 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+                                        <input required type="date" className="w-full p-3 bg-slate-50 rounded-xl  text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
                                     </div>
                                 </div>
                                 <button className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all text-lg">
@@ -683,15 +675,11 @@ const Carpool = ({ onBack }) => {
                 </div>
             )}
 
-            <div className="flex items-center mb-6">
-                <button
-                    onClick={onBack}
-                    className="mr-4 p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors"
-                >
-                    <ArrowLeft size={20} />
-                </button>
-                {view !== 'browse' && <span className="text-slate-400 font-bold mr-2 text-sm">/ Ride Sharing</span>}
-            </div>
+            {view !== 'browse' && (
+                <div className="flex items-center mb-6">
+                    <span className="text-slate-400 font-bold mr-2 text-sm">/ Ride Sharing</span>
+                </div>
+            )}
 
             {view === 'browse' && renderBrowse()}
             {view === 'create' && renderCreate()}
@@ -2037,7 +2025,7 @@ const MetroMap = ({ onBack }) => {
                                         onBlur={() =>
                                             setTimeout(() => setShowSourceSuggestions(false), 200)
                                         }
-                                        className="w-full pl-16 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none font-medium transition-all"
+                                        className="w-full pl-16 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none font-normal transition-all"
                                     />
                                     {showSourceSuggestions &&
                                         sourceData.suggestions.length > 0 && (
@@ -2099,7 +2087,7 @@ const MetroMap = ({ onBack }) => {
                                         onBlur={() =>
                                             setTimeout(() => setShowDestSuggestions(false), 200)
                                         }
-                                        className="w-full pl-16 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none font-medium transition-all"
+                                        className="w-full pl-16 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none font-normal transition-all"
                                     />
                                     {showDestSuggestions && destData.suggestions.length > 0 && (
                                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-50">
@@ -2146,7 +2134,7 @@ const MetroMap = ({ onBack }) => {
                                         onBlur={() =>
                                             setTimeout(() => setShowTrainSuggestions(false), 200)
                                         }
-                                        className="w-full pl-16 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none font-medium transition-all"
+                                        className="w-full pl-16 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none font-normal transition-all"
                                     />
                                     {showTrainSuggestions && trainData.suggestions.length > 0 && (
                                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-50">
@@ -2181,7 +2169,7 @@ const MetroMap = ({ onBack }) => {
                                     onChange={(e) =>
                                         setSearchParams({ ...searchParams, date: e.target.value })
                                     }
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none font-medium transition-all"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none font-normal transition-all"
                                 />
                             </div>
                         </div>
@@ -2393,7 +2381,7 @@ const Transport = () => {
     const menuItems = [
         {
             id: "bus",
-            title: "Campus Shuttle",
+            title: "Bus",
             icon: Bus,
             accent: "blue",
             desc: "Live tracking & schedules for university buses."
@@ -2465,8 +2453,14 @@ const Transport = () => {
 
 
     return (
-        <div className="min-h-full pb-12 animate-fade-in">
-
+        <div className="min-h-full pb-12 animate-fade-in" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            {/* Description Header */}
+            <div className="mb-8">
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">Transportation Hub</h1>
+                <p className="text-slate-500 text-sm">
+                    Navigate your commute with ease. Access bus schedules, metro routes, ride sharing, and live campus maps all in one place.
+                </p>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {menuItems.map((item) => {

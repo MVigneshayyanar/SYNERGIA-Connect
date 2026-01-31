@@ -113,7 +113,10 @@ const Scholarships = () => {
                                     <Buildings size={14} className="mr-1 shrink-0"/>
                                     <span className="truncate">{foundation.address || "Location not specified"}</span>
                                 </div>
-                                <button className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm">
+                                <button 
+                                    onClick={() => window.open("https://maatramfoundation.com/admissions/", "_blank")}
+                                    className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm"
+                                >
                                     Apply Now
                                 </button>
                             </div>
