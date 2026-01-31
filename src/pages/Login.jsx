@@ -1,4 +1,4 @@
-import { Envelope, Lock, ArrowRight, ShieldCheck, Buildings, GraduationCap, Heartbeat } from "@phosphor-icons/react";
+import { Envelope, Lock, ArrowRight, ShieldCheck, Buildings, GraduationCap, Heartbeat, Bus } from "@phosphor-icons/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
@@ -36,6 +36,7 @@ const Login = () => {
         { icon: Buildings, label: "Housing & Property" },
         { icon: GraduationCap, label: "Education Hub" },
         { icon: Heartbeat, label: "Healthcare Access" },
+        { icon: Bus, label: "Transport & Mobility" },
     ];
 
     return (

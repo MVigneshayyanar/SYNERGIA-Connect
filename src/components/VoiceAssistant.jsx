@@ -3,155 +3,203 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useTranslation } from 'react-i18next';
 
-// Voice command mappings for navigation
-const NAVIGATION_COMMANDS = {
-    // Main modules
-    'housing': '/housing',
-    'go to housing': '/housing',
-    'open housing': '/housing',
-    'healthcare': '/healthcare',
-    'go to healthcare': '/healthcare',
-    'open healthcare': '/healthcare',
-    'health': '/healthcare',
-    'medical': '/healthcare',
-    'education': '/education',
-    'go to education': '/education',
-    'open education': '/education',
-    'learning': '/education',
-    'transport': '/transport',
-    'go to transport': '/transport',
-    'open transport': '/transport',
-    'transportation': '/transport',
-    'travel': '/transport',
-
-    // Dashboard
-    'dashboard': '/',
-    'go to dashboard': '/',
-    'home': '/',
-    'go home': '/',
-    'main page': '/',
-
-    // Profile
-    'profile': '/profile',
-    'go to profile': '/profile',
-    'my profile': '/profile',
-    'settings': '/profile',
-
-    // Marketplace
-    'marketplace': '/marketplace',
-    'go to marketplace': '/marketplace',
-    'properties': '/marketplace',
-    'search properties': '/marketplace',
-    'find property': '/marketplace',
-
-    // Post Property
-    'post property': '/post-property',
-    'add property': '/post-property',
-    'list property': '/post-property',
-
-    // Property Management
-    'tenant dashboard': '/property-management/tenant',
-    'tenant': '/property-management/tenant',
-    'landlord dashboard': '/property-management/landlord',
-    'landlord': '/property-management/landlord',
-    'payment portal': '/property-management/payment',
-    'payments': '/property-management/payment',
-    'pay rent': '/property-management/payment',
-    'maintenance': '/property-management/maintenance',
-    'maintenance requests': '/property-management/maintenance',
-    'repairs': '/property-management/maintenance',
-
-    // Home Services
-    'home services': '/home-services',
-    'services': '/home-services',
-    'find services': '/home-services',
-    'plumber': '/home-services',
-    'electrician': '/home-services',
-
-    // Healthcare Scanner
-    'scanner': '/healthcare-scanner',
-    'consent form': '/healthcare-scanner',
-    'scan document': '/healthcare-scanner',
-
-    // Auth pages
-    'login': '/login',
-    'go to login': '/login',
-    'sign in page': '/login',
-    'sign up': '/signup',
-    'signup': '/signup',
-    'go to signup': '/signup',
-    'register': '/signup',
-    'create account page': '/signup',
-};
-
-// Turn off commands
-const TURN_OFF_COMMANDS = [
-    'turn off voice assistant',
-    'turn off voice',
-    'stop voice assistant',
-    'stop voice',
-    'disable voice',
-    'disable voice assistant',
-    'voice off',
-    'quiet',
-    'silence',
-];
+/**
+ * Voice Assistant with Form Input Support
+ * Features:
+ * - Waits for voice input on form fields
+ * - Converts speech to text and fills inputs
+ * - 5-second timeout reminder if no input
+ * - "go" command for navigation
+ * - Step-by-step form guidance
+ */
 
 const VoiceAssistant = () => {
-    const { voiceEnabled, toggleVoice, isListening, startListening, stopListening } = useAccessibility();
+    const { voiceEnabled, toggleVoice, startListening, stopListening, isListening, setSpeaking } = useAccessibility();
     const location = useLocation();
     const navigate = useNavigate();
     const { i18n } = useTranslation();
 
     const recognitionRef = useRef(null);
     const lastPathRef = useRef('');
-    const currentIndexRef = useRef(0);
-    const elementsRef = useRef([]);
     const isSpeakingRef = useRef(false);
-    const [currentFocusedElement, setCurrentFocusedElement] = useState(null);
+    const elementsRef = useRef([]);
+    const currentIndexRef = useRef(0);
+    const isReadingPageRef = useRef(false);
+    const waitingForInputRef = useRef(false);
+    const inputTimeoutRef = useRef(null);
+    const currentInputElementRef = useRef(null);
+    const speechQueueRef = useRef([]);
+    const isProcessingQueueRef = useRef(false);
 
-    // Speak text using Speech Synthesis
-    const speak = useCallback((text, onEnd = null) => {
-        if (!voiceEnabled || !text) return;
+    // ==================== SPEECH SYNTHESIS ====================
 
-        // Cancel any current speech
-        window.speechSynthesis.cancel();
+    // Process speech queue one at a time
+    const processQueue = useCallback(() => {
+        if (isProcessingQueueRef.current || speechQueueRef.current.length === 0) {
+            return;
+        }
+
+        isProcessingQueueRef.current = true;
+        const { text, onEnd } = speechQueueRef.current.shift();
+
+        // Stop recognition while speaking
+        if (recognitionRef.current) {
+            try { recognitionRef.current.stop(); } catch (e) { }
+        }
+
         isSpeakingRef.current = true;
+        setSpeaking?.(true);
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = i18n.language === 'hi' ? 'hi-IN' : 'en-US';
-        utterance.rate = 0.85;
-        utterance.pitch = 1;
+        utterance.rate = 0.8; // Slower for clarity
+        utterance.pitch = 1.0;
         utterance.volume = 1;
 
-        // Select voice
+        // Get a good voice
         const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find(v => v.lang.startsWith(utterance.lang.split('-')[0]));
+        const preferredVoice = voices.find(v =>
+            v.lang.includes(i18n.language === 'hi' ? 'hi' : 'en') &&
+            (v.name.includes('Microsoft') || v.name.includes('Google') || v.localService)
+        ) || voices.find(v => v.lang.includes(i18n.language === 'hi' ? 'hi' : 'en'));
+
         if (preferredVoice) utterance.voice = preferredVoice;
 
-        utterance.onend = () => {
+        let hasEnded = false;
+
+        const handleEnd = () => {
+            if (hasEnded) return;
+            hasEnded = true;
+
             isSpeakingRef.current = false;
-            if (onEnd) onEnd();
+            setSpeaking?.(false);
+            isProcessingQueueRef.current = false;
+
+            // Restart recognition after speech
+            if (voiceEnabled && recognitionRef.current) {
+                setTimeout(() => {
+                    try { recognitionRef.current.start(); } catch (e) { }
+                }, 300);
+            }
+
+            // Call the callback
+            if (onEnd) {
+                setTimeout(onEnd, 500);
+            }
+
+            // Process next item in queue
+            setTimeout(() => processQueue(), 300);
         };
 
-        utterance.onerror = () => {
-            isSpeakingRef.current = false;
-            if (onEnd) onEnd();
+        utterance.onend = handleEnd;
+        utterance.onerror = (e) => {
+            console.log('Speech error:', e);
+            handleEnd();
+        };
+
+        // Chrome bug workaround - keep speech alive
+        const keepAlive = setInterval(() => {
+            if (window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
+            }
+        }, 100);
+
+        utterance.onend = () => {
+            clearInterval(keepAlive);
+            handleEnd();
         };
 
         window.speechSynthesis.speak(utterance);
-    }, [voiceEnabled, i18n.language]);
 
-    // Get description for an element
-    const describeElement = useCallback((el) => {
+        // Safety timeout based on text length (150 words per minute at 0.8 rate)
+        const wordCount = text.split(' ').length;
+        const safetyTimeout = Math.max(3000, (wordCount / 1.5) * 1000);
+
+        setTimeout(() => {
+            if (!hasEnded) {
+                console.log('Safety timeout triggered');
+                clearInterval(keepAlive);
+                handleEnd();
+            }
+        }, safetyTimeout);
+
+    }, [voiceEnabled, i18n.language, setSpeaking]);
+
+    const speak = useCallback((text, onEnd = null) => {
+        if (!voiceEnabled || !text) {
+            if (onEnd) setTimeout(onEnd, 100);
+            return;
+        }
+
+        console.log('Queueing speech:', text.substring(0, 50) + '...');
+        speechQueueRef.current.push({ text, onEnd });
+        processQueue();
+    }, [voiceEnabled, processQueue]);
+
+    // ==================== PAGE CONTENT COLLECTION ====================
+
+    const getPageName = useCallback(() => {
+        const path = location.pathname;
+        if (path === '/') return 'Dashboard';
+        if (path === '/login') return 'Login';
+        if (path === '/signup') return 'Sign Up';
+        return path.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') || 'page';
+    }, [location.pathname]);
+
+    const collectElements = useCallback(() => {
+        const items = [];
+        const seen = new Set();
+
+        let main = document.querySelector('main');
+        if (!main) {
+            main = document.querySelector('form')?.closest('div') ||
+                document.querySelector('.min-h-screen') ||
+                document.body;
+        }
+
+        const selectors = [
+            'h1', 'h2',
+            'p:not(:empty)',
+            'label:not(:empty)',
+            'input:not([type="hidden"])',
+            'textarea',
+            'select',
+            'button[type="submit"]',
+            'a[href]:not([aria-hidden="true"])',
+        ];
+
+        const elements = main.querySelectorAll(selectors.join(', '));
+
+        elements.forEach(el => {
+            if (el.offsetParent === null && !['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) return;
+            if (el.closest('nav, aside, [aria-hidden="true"], .sidebar')) return;
+            if (el.textContent?.toLowerCase().includes('voice')) return;
+
+            const desc = describeElement(el);
+            if (desc && desc.length > 2 && !seen.has(desc)) {
+                seen.add(desc);
+                items.push({
+                    element: el,
+                    text: desc,
+                    isInput: ['INPUT', 'TEXTAREA'].includes(el.tagName) && el.type !== 'submit' && el.type !== 'checkbox',
+                    isButton: el.tagName === 'BUTTON' || el.type === 'submit',
+                    isCheckbox: el.type === 'checkbox',
+                    isLink: el.tagName === 'A',
+                    tag: el.tagName
+                });
+            }
+        });
+
+        return items;
+    }, []);
+
+    const describeElement = (el) => {
         const tag = el.tagName.toLowerCase();
-        const type = el.type?.toLowerCase() || '';
         const text = el.textContent?.trim() || '';
         const placeholder = el.placeholder || '';
         const ariaLabel = el.getAttribute('aria-label') || '';
-        const value = el.value || '';
+        const type = el.type?.toLowerCase() || '';
 
-        // Get label
         let label = '';
         if (el.id) {
             const labelEl = document.querySelector(`label[for="${el.id}"]`);
@@ -161,312 +209,248 @@ const VoiceAssistant = () => {
             label = el.previousElementSibling.textContent?.trim() || '';
         }
 
-        // Describe based on element type
         if (tag === 'h1') return `Page title: ${text}`;
-        if (tag === 'h2') return `Section: ${text}`;
-        if (tag === 'h3') return `Subsection: ${text}`;
-        if (tag === 'p' && text.length > 0 && text.length < 300) return text;
-        if (tag === 'span' && text.length > 0 && text.length < 100) return text;
+        if (tag === 'h2') return `${text}`;
+        if (tag === 'p' && text.length > 0 && text.length < 200) return text;
 
         if (tag === 'input') {
             const fieldName = label || ariaLabel || placeholder || 'field';
-            if (type === 'text' || type === 'email' || type === 'tel' || type === 'number') {
-                return `${fieldName} input field. ${value ? `Current value is ${value}.` : ''} Say your input or say next.`;
+            if (['text', 'email', 'tel', 'number', 'search'].includes(type)) {
+                return `${fieldName}. Please tell me what to enter.`;
             }
-            if (type === 'password') {
-                return `${fieldName}. Type your password then say next.`;
-            }
-            if (type === 'checkbox') {
-                return `${fieldName} checkbox, ${el.checked ? 'checked' : 'not checked'}. Say check to toggle.`;
-            }
-            if (type === 'date') {
-                return `${fieldName} date field. ${value ? `Set to ${value}.` : ''} Say next to continue.`;
-            }
-            if (type === 'submit') {
-                return `${value || 'Submit'} button. Say click to press.`;
-            }
+            if (type === 'password') return `${fieldName}. Please type your password manually, then say next.`;
+            if (type === 'checkbox') return `${fieldName} checkbox. Say check or uncheck.`;
+            if (type === 'submit') return `${el.value || 'Submit'} button. Say submit to press.`;
         }
 
-        if (tag === 'textarea') {
-            return `${label || ariaLabel || placeholder || 'Text area'}. Say your input.`;
-        }
-
-        if (tag === 'select') {
-            const selected = el.options[el.selectedIndex]?.text || 'none';
-            return `${label || ariaLabel || 'Dropdown'}. Currently ${selected}. Say select to change.`;
-        }
-
-        if (tag === 'button') {
-            return `${text || ariaLabel || 'Button'}. Say click to press.`;
-        }
-
-        if (tag === 'a') {
-            return `Link: ${text || ariaLabel}. Say click to open.`;
-        }
-
-        if (tag === 'label') {
-            return text;
-        }
-
-        if (tag === 'div' || tag === 'li') {
-            // Only read divs/lis with short direct text (not nested)
-            const directText = Array.from(el.childNodes)
-                .filter(n => n.nodeType === Node.TEXT_NODE)
-                .map(n => n.textContent?.trim())
-                .join(' ')
-                .trim();
-            if (directText && directText.length > 5 && directText.length < 150) {
-                return directText;
-            }
-        }
+        if (tag === 'textarea') return `${label || placeholder || 'Text area'}. Please tell me what to enter.`;
+        if (tag === 'select') return `${label || ariaLabel || 'Dropdown'}. Say next to continue.`;
+        if (tag === 'button') return `${text || 'Button'}. Say submit to press.`;
+        if (tag === 'a') return `Link to ${text}. Say go to follow.`;
+        if (tag === 'label') return '';
 
         return null;
-    }, []);
+    };
 
-    // Collect all readable elements from the page
-    const collectPageElements = useCallback(() => {
-        const items = [];
-        const seen = new Set();
+    // ==================== FORM INPUT HANDLING ====================
 
-        // Get the main content area (exclude sidebar/nav)
-        const mainContent = document.querySelector('main') || document.body;
+    const startInputTimeout = useCallback(() => {
+        // Clear any existing timeout
+        if (inputTimeoutRef.current) {
+            clearTimeout(inputTimeoutRef.current);
+        }
 
-        // Select elements that contain content
-        const selector = 'h1, h2, h3, p, label, input:not([type="hidden"]), textarea, select, button:not([aria-hidden="true"]), a[href]:not([aria-hidden="true"]), span.text-lg, span.text-xl, div.card-title, li';
-        const elements = mainContent.querySelectorAll(selector);
-
-        elements.forEach(el => {
-            // Skip hidden elements
-            if (el.offsetParent === null && !['INPUT', 'SELECT'].includes(el.tagName)) return;
-            // Skip elements in nav/sidebar/hidden areas
-            if (el.closest('nav, aside, [aria-hidden="true"], .sidebar')) return;
-            // Skip tiny elements
-            if (el.offsetWidth < 10 && el.offsetHeight < 10) return;
-
-            const desc = describeElement(el);
-            if (desc && desc.length > 2 && !seen.has(desc)) {
-                seen.add(desc);
-                items.push({
-                    element: el,
-                    text: desc,
-                    isInteractive: ['INPUT', 'BUTTON', 'A', 'SELECT', 'TEXTAREA'].includes(el.tagName)
+        // Set 5-second timeout to remind user
+        inputTimeoutRef.current = setTimeout(() => {
+            if (waitingForInputRef.current && currentInputElementRef.current) {
+                const fieldName = currentInputElementRef.current.placeholder ||
+                    currentInputElementRef.current.getAttribute('aria-label') ||
+                    'this field';
+                speak(`I'm waiting for your input for ${fieldName}. Please speak now, or say next to skip.`, () => {
+                    // Restart timeout
+                    startInputTimeout();
                 });
             }
-        });
+        }, 5000);
+    }, [speak]);
 
-        return items;
-    }, [describeElement]);
+    const handleVoiceInput = useCallback((transcript) => {
+        const input = transcript.toLowerCase().trim();
 
-    // Read the current element
-    const readCurrentElement = useCallback(() => {
-        const elements = elementsRef.current;
-        const index = currentIndexRef.current;
+        // Navigation commands - "go" followed by destination
+        if (input.startsWith('go to ') || input.startsWith('goto ')) {
+            const destination = input.replace(/^go ?to\s+/, '');
+            const routes = {
+                'housing': '/housing',
+                'healthcare': '/healthcare',
+                'health': '/healthcare',
+                'education': '/education',
+                'transport': '/transport',
+                'dashboard': '/',
+                'home': '/',
+                'profile': '/profile',
+                'signup': '/signup',
+                'sign up': '/signup',
+                'login': '/login',
+                'marketplace': '/marketplace',
+            };
 
-        if (index >= elements.length) {
-            speak('End of page. Say read page to start over, or give a command like go to housing.', () => {
-                startListening();
-            });
-            return;
-        }
-
-        const item = elements[index];
-
-        // Highlight and focus
-        if (currentFocusedElement) {
-            currentFocusedElement.style.outline = '';
-            currentFocusedElement.style.boxShadow = '';
-        }
-
-        if (item.element) {
-            item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            if (item.isInteractive) {
-                item.element.focus();
-            }
-            item.element.style.outline = '3px solid #3B82F6';
-            item.element.style.boxShadow = '0 0 10px rgba(59, 130, 246, 0.5)';
-            setCurrentFocusedElement(item.element);
-        }
-
-        speak(item.text, () => {
-            if (item.isInteractive) {
-                // Wait for user input on interactive elements
-                startListening();
-            } else {
-                // Auto-continue for non-interactive elements
-                currentIndexRef.current++;
-                setTimeout(() => readCurrentElement(), 400);
-            }
-        });
-    }, [speak, startListening, currentFocusedElement]);
-
-    // Start reading the page
-    const readPage = useCallback(() => {
-        if (!voiceEnabled) return;
-
-        window.speechSynthesis.cancel();
-
-        // Wait for page to fully render
-        setTimeout(() => {
-            elementsRef.current = collectPageElements();
-            currentIndexRef.current = 0;
-
-            if (elementsRef.current.length === 0) {
-                speak('No content found on this page. Try navigating to another page.');
-                return;
-            }
-
-            // Announce page name first
-            const pageName = location.pathname === '/' ? 'Dashboard' :
-                location.pathname.split('/').pop()?.replace(/-/g, ' ') || 'page';
-
-            speak(`You are on the ${pageName}. Reading page content.`, () => {
-                setTimeout(() => readCurrentElement(), 300);
-            });
-        }, 800);
-    }, [voiceEnabled, collectPageElements, location.pathname, speak, readCurrentElement]);
-
-    // Move to next element
-    const nextElement = useCallback(() => {
-        if (currentFocusedElement) {
-            currentFocusedElement.style.outline = '';
-            currentFocusedElement.style.boxShadow = '';
-        }
-        currentIndexRef.current++;
-        readCurrentElement();
-    }, [readCurrentElement, currentFocusedElement]);
-
-    // Click the current element
-    const clickCurrent = useCallback(() => {
-        const elements = elementsRef.current;
-        const index = currentIndexRef.current;
-
-        if (index < elements.length && elements[index].element) {
-            const el = elements[index].element;
-            speak('Clicking', () => {
-                el.click();
-                // Move to next after click
-                setTimeout(() => {
-                    currentIndexRef.current++;
-                    readCurrentElement();
-                }, 500);
-            });
-        }
-    }, [speak, readCurrentElement]);
-
-    // Handle voice input for text fields
-    const enterText = useCallback((text) => {
-        const elements = elementsRef.current;
-        const index = currentIndexRef.current;
-
-        if (index < elements.length) {
-            const el = elements[index].element;
-            if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
-                const inputType = el.type?.toLowerCase();
-                if (inputType !== 'password' && inputType !== 'submit') {
-                    el.value = text;
-                    el.dispatchEvent(new Event('input', { bubbles: true }));
-                    el.dispatchEvent(new Event('change', { bubbles: true }));
-                    speak(`Entered ${text}. Say next to continue.`, () => {
-                        startListening();
+            for (const [key, path] of Object.entries(routes)) {
+                if (destination.includes(key)) {
+                    speak(`Going to ${key}`, () => {
+                        navigate(path);
                     });
                     return true;
                 }
             }
         }
-        return false;
-    }, [speak, startListening]);
 
-    // Process voice command
-    const processCommand = useCallback((command) => {
-        const cmd = command.toLowerCase().trim();
-        console.log('Voice command:', cmd);
-
-        // Turn off commands
-        if (TURN_OFF_COMMANDS.some(c => cmd.includes(c))) {
-            speak('Turning off voice assistant. Goodbye!');
-            setTimeout(() => toggleVoice(false), 1500);
-            return;
-        }
-
-        // Navigation commands
-        for (const [phrase, path] of Object.entries(NAVIGATION_COMMANDS)) {
-            if (cmd.includes(phrase)) {
-                const pageName = phrase.replace(/go to |open /g, '');
-                speak(`Going to ${pageName}`, () => {
-                    navigate(path);
+        // Single word "go" means submit or proceed
+        if (input === 'go' || input === 'submit' || input === 'sign in' || input === 'login') {
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                speak('Submitting the form', () => {
+                    submitBtn.click();
                 });
-                return;
+                return true;
             }
         }
 
-        // Control commands
-        if (cmd === 'next' || cmd === 'skip' || cmd === 'continue') {
-            nextElement();
-            return;
+        // Navigation control commands
+        if (input === 'next' || input === 'skip') {
+            waitingForInputRef.current = false;
+            if (inputTimeoutRef.current) clearTimeout(inputTimeoutRef.current);
+            currentIndexRef.current++;
+            setTimeout(() => readNextElement(), 500);
+            return true;
         }
 
-        if (cmd === 'click' || cmd === 'press' || cmd === 'enter' || cmd === 'submit') {
-            clickCurrent();
-            return;
-        }
-
-        if (cmd === 'sign in' || cmd === 'login' || cmd === 'sign up' || cmd === 'create account') {
-            // Find and click the relevant button
-            const buttons = document.querySelectorAll('button[type="submit"], button');
-            for (const btn of buttons) {
-                const btnText = btn.textContent?.toLowerCase() || '';
-                if (btnText.includes('sign') || btnText.includes('login') || btnText.includes('create')) {
-                    btn.click();
-                    speak('Submitting');
-                    return;
-                }
-            }
-        }
-
-        if (cmd === 'back' || cmd === 'go back' || cmd === 'previous') {
-            speak('Going back');
+        if (input === 'back' || input === 'previous') {
             navigate(-1);
-            return;
+            return true;
         }
 
-        if (cmd === 'read' || cmd === 'read page' || cmd === 'read again' || cmd === 'start over') {
-            readPage();
-            return;
+        if (input === 'stop' || input === 'pause') {
+            window.speechSynthesis.cancel();
+            isReadingPageRef.current = false;
+            waitingForInputRef.current = false;
+            speak('Stopped. Say read to continue or go to navigate.');
+            return true;
         }
 
-        if (cmd === 'check' || cmd === 'toggle') {
+        if (input === 'read' || input === 'start') {
+            startReadingPage();
+            return true;
+        }
+
+        if (input.includes('turn off') || input.includes('disable voice')) {
+            speak('Turning off voice assistant', () => {
+                toggleVoice(false);
+            });
+            return true;
+        }
+
+        // Checkbox handling
+        if (input === 'check' || input === 'uncheck' || input === 'toggle') {
             const elements = elementsRef.current;
             const index = currentIndexRef.current;
-            if (index < elements.length) {
+            if (index < elements.length && elements[index].isCheckbox) {
                 const el = elements[index].element;
-                if (el && el.type === 'checkbox') {
-                    el.checked = !el.checked;
-                    el.dispatchEvent(new Event('change', { bubbles: true }));
-                    speak(el.checked ? 'Checked' : 'Unchecked', () => startListening());
-                    return;
-                }
+                el.checked = !el.checked;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                speak(el.checked ? 'Checked' : 'Unchecked', () => {
+                    currentIndexRef.current++;
+                    setTimeout(() => readNextElement(), 500);
+                });
+                return true;
             }
         }
 
-        if (cmd.includes('stop') && !cmd.includes('voice')) {
-            window.speechSynthesis.cancel();
-            speak('Stopped. Say read to continue or give a command.');
-            startListening();
-            return;
-        }
+        // If waiting for input on a form field, enter the text
+        if (waitingForInputRef.current && currentInputElementRef.current) {
+            const el = currentInputElementRef.current;
 
-        // Try to enter as text input
-        if (enterText(command)) {
-            return;
+            // Don't fill password fields with voice
+            if (el.type === 'password') {
+                speak('Please type your password manually, then say next to continue.');
+                return true;
+            }
+
+            // Fill the input with the spoken text
+            el.value = transcript; // Use original case
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // Clear timeout and move to next
+            if (inputTimeoutRef.current) clearTimeout(inputTimeoutRef.current);
+            waitingForInputRef.current = false;
+            currentInputElementRef.current = null;
+
+            speak(`Entered ${transcript}. Moving to next field.`, () => {
+                currentIndexRef.current++;
+                setTimeout(() => readNextElement(), 500);
+            });
+            return true;
         }
 
         // Unknown command
-        speak(`I heard ${command}. Say next to continue, or try a command like go to housing.`, () => {
-            startListening();
-        });
-    }, [speak, toggleVoice, navigate, nextElement, clickCurrent, readPage, enterText, startListening]);
+        speak(`I heard "${transcript}". Say go to navigate, next to continue, or speak your input for form fields.`);
+        return true;
+    }, [speak, navigate, toggleVoice]);
 
-    // Initialize speech recognition
+    // ==================== READING FUNCTIONS ====================
+
+    const startReadingPage = useCallback(() => {
+        window.speechSynthesis.cancel();
+        isReadingPageRef.current = true;
+        waitingForInputRef.current = false;
+        elementsRef.current = collectElements();
+        currentIndexRef.current = 0;
+
+        const pageName = getPageName();
+        const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
+        let intro = `You are on the ${pageName} page.`;
+        if (isAuthPage) {
+            intro += ` I will guide you through each field. Speak your answers and I will fill them in. Say go when done to submit.`;
+        }
+
+        speak(intro, () => {
+            setTimeout(() => readNextElement(), 800);
+        });
+    }, [collectElements, getPageName, location.pathname, speak]);
+
+    const readNextElement = useCallback(() => {
+        if (!isReadingPageRef.current) return;
+
+        const elements = elementsRef.current;
+        const index = currentIndexRef.current;
+
+        if (index >= elements.length) {
+            isReadingPageRef.current = false;
+            speak('End of form. Say go or submit to continue, or go to followed by a page name to navigate.');
+            return;
+        }
+
+        const item = elements[index];
+
+        // Highlight element
+        document.querySelectorAll('.voice-highlight').forEach(el => {
+            el.classList.remove('voice-highlight');
+            el.style.outline = '';
+            el.style.boxShadow = '';
+        });
+
+        if (item.element) {
+            item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            item.element.classList.add('voice-highlight');
+            item.element.style.outline = '3px solid #3B82F6';
+            item.element.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.4)';
+            item.element.focus();
+        }
+
+        speak(item.text, () => {
+            if (item.isInput) {
+                // This is an input field - wait for voice input
+                waitingForInputRef.current = true;
+                currentInputElementRef.current = item.element;
+                startInputTimeout();
+            } else if (item.isButton) {
+                // Button - just announce and wait for command
+                speak('Say go or submit to press this button, or next to skip.');
+            } else if (item.isCheckbox) {
+                // Checkbox - wait for check/uncheck command
+                speak('Say check or uncheck, or next to skip.');
+            } else {
+                // Non-interactive - auto continue
+                currentIndexRef.current++;
+                setTimeout(() => readNextElement(), 1000);
+            }
+        });
+    }, [speak, startInputTimeout]);
+
+    // ==================== SPEECH RECOGNITION ====================
+
     useEffect(() => {
         if (!voiceEnabled) {
             if (recognitionRef.current) {
@@ -482,92 +466,148 @@ const VoiceAssistant = () => {
         }
 
         const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
+        recognition.continuous = true;
+        recognition.interimResults = true; // Enable interim results for faster detection
         recognition.lang = i18n.language === 'hi' ? 'hi-IN' : 'en-US';
+        recognition.maxAlternatives = 3; // More alternatives for better accuracy
+
+        recognition.onstart = () => {
+            console.log('Speech recognition started');
+            startListening();
+        };
 
         recognition.onresult = (event) => {
-            const transcript = event.results[event.results.length - 1][0].transcript;
-            processCommand(transcript);
+            // Get the latest result
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                if (result.isFinal) {
+                    // Only process final results
+                    const transcript = result[0].transcript.trim();
+                    const confidence = result[0].confidence;
+                    console.log('Voice detected:', transcript, 'Confidence:', (confidence * 100).toFixed(1) + '%');
+
+                    if (transcript && transcript.length > 0) {
+                        handleVoiceInput(transcript);
+                    }
+                } else {
+                    // Log interim results for debugging
+                    console.log('Hearing:', result[0].transcript);
+                }
+            }
         };
 
         recognition.onerror = (event) => {
             console.log('Recognition error:', event.error);
-            if (event.error === 'no-speech' && voiceEnabled && isListening) {
-                // Restart on no speech
+            if (event.error === 'not-allowed') {
+                speak('Please allow microphone access. Go to browser settings and enable microphone for this site.');
+            } else if (event.error === 'no-speech') {
+                // No speech detected - restart silently
+                console.log('No speech detected, restarting...');
+            } else if (event.error === 'audio-capture') {
+                speak('Microphone not found. Please check your microphone connection.');
+            } else if (event.error === 'network') {
+                speak('Network error. Please check your internet connection.');
+            }
+
+            // Auto-restart on most errors
+            if (voiceEnabled && event.error !== 'not-allowed' && event.error !== 'audio-capture') {
                 setTimeout(() => {
                     try { recognition.start(); } catch (e) { }
-                }, 100);
+                }, 500);
             }
         };
 
         recognition.onend = () => {
-            if (voiceEnabled && isListening && !isSpeakingRef.current) {
+            console.log('Speech recognition ended');
+            // Always restart if voice is still enabled
+            if (voiceEnabled && !isSpeakingRef.current) {
                 setTimeout(() => {
-                    try { recognition.start(); } catch (e) { }
-                }, 100);
+                    try {
+                        recognition.start();
+                        console.log('Speech recognition restarted');
+                    } catch (e) {
+                        console.log('Could not restart:', e);
+                    }
+                }, 200);
             }
+        };
+
+        recognition.onsoundstart = () => {
+            console.log('Sound detected');
+        };
+
+        recognition.onspeechstart = () => {
+            console.log('Speech started');
         };
 
         recognitionRef.current = recognition;
 
+        // Start recognition
+        setTimeout(() => {
+            try {
+                recognition.start();
+                console.log('Initial speech recognition start');
+            } catch (e) {
+                console.log('Could not start recognition:', e);
+            }
+        }, 500);
+
         return () => {
             try { recognitionRef.current?.stop(); } catch (e) { }
         };
-    }, [voiceEnabled, i18n.language, processCommand, isListening]);
+    }, [voiceEnabled, i18n.language, handleVoiceInput, speak, startListening]);
 
-    // Handle listening state
-    useEffect(() => {
-        if (!recognitionRef.current) return;
+    // ==================== PAGE CHANGE HANDLING ====================
 
-        if (isListening && voiceEnabled && !isSpeakingRef.current) {
-            try { recognitionRef.current.start(); } catch (e) { }
-        } else {
-            try { recognitionRef.current.stop(); } catch (e) { }
-        }
-    }, [isListening, voiceEnabled]);
-
-    // Read page on route change
     useEffect(() => {
         if (voiceEnabled && location.pathname !== lastPathRef.current) {
             lastPathRef.current = location.pathname;
-            setTimeout(() => readPage(), 1200);
-        }
-    }, [location.pathname, voiceEnabled, readPage]);
+            isReadingPageRef.current = false;
+            waitingForInputRef.current = false;
+            currentIndexRef.current = 0;
 
-    // Initial welcome when voice is first enabled
+            setTimeout(() => {
+                startReadingPage();
+            }, 1500);
+        }
+    }, [location.pathname, voiceEnabled, startReadingPage]);
+
+    // Initial greeting
     useEffect(() => {
         if (voiceEnabled) {
-            const initVoice = () => {
-                speak('Voice assistant activated. I will read the page for you.', () => {
-                    setTimeout(() => readPage(), 500);
+            const greet = () => {
+                const pageName = getPageName();
+                speak(`Voice assistant ready. Welcome to ${pageName}. I will guide you through this page.`, () => {
+                    setTimeout(() => startReadingPage(), 800);
                 });
             };
 
-            // Wait for voices to load
             if (window.speechSynthesis.getVoices().length > 0) {
-                setTimeout(initVoice, 600);
+                setTimeout(greet, 1200);
             } else {
-                window.speechSynthesis.onvoiceschanged = () => setTimeout(initVoice, 600);
+                window.speechSynthesis.onvoiceschanged = () => setTimeout(greet, 1200);
             }
         }
 
         return () => {
             window.speechSynthesis.cancel();
+            if (inputTimeoutRef.current) clearTimeout(inputTimeoutRef.current);
+            document.querySelectorAll('.voice-highlight').forEach(el => {
+                el.classList.remove('voice-highlight');
+                el.style.outline = '';
+                el.style.boxShadow = '';
+            });
         };
     }, [voiceEnabled]); // eslint-disable-line
 
-    // Cleanup on unmount
+    // Cleanup
     useEffect(() => {
         return () => {
             window.speechSynthesis.cancel();
-            if (currentFocusedElement) {
-                currentFocusedElement.style.outline = '';
-                currentFocusedElement.style.boxShadow = '';
-            }
+            if (inputTimeoutRef.current) clearTimeout(inputTimeoutRef.current);
             try { recognitionRef.current?.stop(); } catch (e) { }
         };
-    }, []); // eslint-disable-line
+    }, []);
 
     return null;
 };

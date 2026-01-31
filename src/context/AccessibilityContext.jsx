@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 
 const AccessibilityContext = createContext();
 
@@ -9,6 +9,7 @@ export const AccessibilityProvider = ({ children }) => {
     const [signLanguageEnabled, setSignLanguageEnabled] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [isListening, setIsListening] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     useEffect(() => {
         // Check localStorage for saved preferences
@@ -36,10 +37,17 @@ export const AccessibilityProvider = ({ children }) => {
         setVoiceEnabled(newState);
         localStorage.setItem('voiceEnabled', JSON.stringify(newState));
 
-        // If turning off, also stop listening
+        // If turning off, stop everything
         if (!newState) {
             setIsListening(false);
+            setIsSpeaking(false);
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
         }
+
+        // Close popup after making choice
+        setShowPopup(false);
+        sessionStorage.setItem('accessibilityAsked', 'true');
     };
 
     const toggleSignLanguage = (value) => {
@@ -58,9 +66,12 @@ export const AccessibilityProvider = ({ children }) => {
         setIsListening(false);
     };
 
+    const setSpeaking = (value) => {
+        setIsSpeaking(value);
+    };
+
     const closePopup = () => {
         setShowPopup(false);
-        // Mark that we asked this session
         sessionStorage.setItem('accessibilityAsked', 'true');
 
         // Set defaults if not explicitly chosen
@@ -84,7 +95,9 @@ export const AccessibilityProvider = ({ children }) => {
             closePopup,
             isListening,
             startListening,
-            stopListening
+            stopListening,
+            isSpeaking,
+            setSpeaking
         }}>
             {children}
         </AccessibilityContext.Provider>

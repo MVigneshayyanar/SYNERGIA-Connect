@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useTranslation } from 'react-i18next';
-import { X } from '@phosphor-icons/react';
+import { X, Microphone, SpeakerHigh } from '@phosphor-icons/react';
 
 const AccessibilityPopup = () => {
     const { showPopup, closePopup, toggleVoice } = useAccessibility();
@@ -9,51 +9,62 @@ const AccessibilityPopup = () => {
 
     if (!showPopup) return null;
 
+    const handleEnableVoice = () => {
+        toggleVoice(true);
+    };
+
+    const handleDisableVoice = () => {
+        toggleVoice(false);
+    };
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-md w-full relative border border-gray-200 dark:border-gray-700">
-                <button
-                    onClick={closePopup}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                    <X size={24} />
-                </button>
-
-                <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white text-center">
-                    {t('Welcome')}
-                </h2>
-
-                <div className="space-y-6">
-                    {/* Voice Assistant Option */}
-                    <div className="flex flex-col gap-3">
-                        <p className="text-lg text-gray-700 dark:text-gray-300 font-medium">
-                            {t('EnableVoice')}
-                        </p>
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => toggleVoice(true)}
-                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                            >
-                                {t('Yes')}
-                            </button>
-                            <button
-                                onClick={() => toggleVoice(false)}
-                                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                            >
-                                {t('No')}
-                            </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4 border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#FF6347] to-[#FF8C69] rounded-xl flex items-center justify-center shadow-lg shadow-[#FF6347]/20">
+                            <SpeakerHigh size={22} weight="fill" className="text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900">Voice Assistant</h2>
+                            <p className="text-xs text-slate-500">Accessibility Feature</p>
                         </div>
                     </div>
-
-
-                </div>
-
-                <div className="mt-8">
                     <button
                         onClick={closePopup}
-                        className="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-semibold hover:opacity-90 transition"
+                        className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
                     >
-                        {t('Close')}
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Description */}
+                <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                        Enable voice assistant to navigate the website using voice commands.
+                        I'll read page content and guide you through the application.
+                    </p>
+                    <div className="flex items-center gap-2 mt-3 text-xs text-slate-500">
+                        <Microphone size={14} className="text-[#FF6347]" />
+                        <span>Requires microphone access</span>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleDisableVoice}
+                        className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
+                    >
+                        No, Thanks
+                    </button>
+                    <button
+                        onClick={handleEnableVoice}
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-[#FF6347] to-[#FF8C69] text-white rounded-xl font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-[#FF6347]/25 flex items-center justify-center gap-2"
+                    >
+                        <Microphone size={18} weight="fill" />
+                        Enable Voice
                     </button>
                 </div>
             </div>
