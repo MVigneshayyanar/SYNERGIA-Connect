@@ -8,18 +8,26 @@ export const AccessibilityProvider = ({ children }) => {
     const [voiceEnabled, setVoiceEnabled] = useState(false);
     const [signLanguageEnabled, setSignLanguageEnabled] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
+    const [isListening, setIsListening] = useState(false);
 
     useEffect(() => {
-        // Check local storage for preferences
+        // Check localStorage for saved preferences
         const storedVoice = localStorage.getItem('voiceEnabled');
         const storedSign = localStorage.getItem('signLanguageEnabled');
 
-        // If no preference set, show popup
-        if (storedVoice === null || storedSign === null) {
-            setShowPopup(true);
-        } else {
+        // Check sessionStorage to see if we already asked this session
+        const sessionAsked = sessionStorage.getItem('accessibilityAsked');
+
+        if (storedVoice !== null) {
             setVoiceEnabled(JSON.parse(storedVoice));
+        }
+        if (storedSign !== null) {
             setSignLanguageEnabled(JSON.parse(storedSign));
+        }
+
+        // Show popup each session if not already asked this session
+        if (!sessionAsked) {
+            setShowPopup(true);
         }
     }, []);
 
@@ -27,6 +35,11 @@ export const AccessibilityProvider = ({ children }) => {
         const newState = value !== undefined ? value : !voiceEnabled;
         setVoiceEnabled(newState);
         localStorage.setItem('voiceEnabled', JSON.stringify(newState));
+
+        // If turning off, also stop listening
+        if (!newState) {
+            setIsListening(false);
+        }
     };
 
     const toggleSignLanguage = (value) => {
@@ -35,12 +48,22 @@ export const AccessibilityProvider = ({ children }) => {
         localStorage.setItem('signLanguageEnabled', JSON.stringify(newState));
     };
 
+    const startListening = () => {
+        if (voiceEnabled) {
+            setIsListening(true);
+        }
+    };
+
+    const stopListening = () => {
+        setIsListening(false);
+    };
+
     const closePopup = () => {
         setShowPopup(false);
-        // Determine user preference if they just closed it without explicit "Yes"
-        // Usually we save what they selected. If they dismissed, maybe leave as is or set defaults.
-        // For now, we assume they made choices in the popup before closing, 
-        // or if they just close, we set default false if null.
+        // Mark that we asked this session
+        sessionStorage.setItem('accessibilityAsked', 'true');
+
+        // Set defaults if not explicitly chosen
         if (localStorage.getItem('voiceEnabled') === null) {
             localStorage.setItem('voiceEnabled', 'false');
             setVoiceEnabled(false);
@@ -58,7 +81,10 @@ export const AccessibilityProvider = ({ children }) => {
             signLanguageEnabled,
             toggleSignLanguage,
             showPopup,
-            closePopup
+            closePopup,
+            isListening,
+            startListening,
+            stopListening
         }}>
             {children}
         </AccessibilityContext.Provider>

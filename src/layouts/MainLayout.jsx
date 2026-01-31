@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CaretRight } from "@phosphor-icons/react";
 import AccessibilityPopup from "../components/AccessibilityPopup";
 import VoiceAssistant from "../components/VoiceAssistant";
-
+import VoiceAssistantToggle from "../components/VoiceAssistantToggle";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const MainLayout = () => {
@@ -51,6 +51,7 @@ const MainLayout = () => {
             </div>
             {/* Right side of header */}
             <div className="text-xs font-medium text-slate-400 flex items-center gap-2 md:gap-4">
+              <VoiceAssistantToggle />
               <LanguageSwitcher />
               <span className="hidden sm:inline">
                 {new Date().toLocaleDateString(undefined, {
