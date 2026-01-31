@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CaretRight } from "@phosphor-icons/react";
 import AccessibilityPopup from "../components/AccessibilityPopup";
 import VoiceAssistant from "../components/VoiceAssistant";
-import SignLanguageWidget from "../components/SignLanguageWidget";
+
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const MainLayout = () => {
@@ -25,7 +25,7 @@ const MainLayout = () => {
         <Sidebar />
         <AccessibilityPopup />
         <VoiceAssistant />
-        <SignLanguageWidget />
+
 
         {/* Main Content Wrapper */}
         <main className="flex-1 ml-64 h-screen flex flex-col relative w-full">

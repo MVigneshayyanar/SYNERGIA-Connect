@@ -9,6 +9,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import { Education, Healthcare, Transport, Housing } from "./pages/Modules";
+import ConsentFormScanner from "./pages/healthcare/ConsentFormScanner";
 
 // Marketplace
 import PropertySearch from "./pages/Marketplace/PropertySearch";
@@ -42,8 +43,10 @@ function App() {
                 {/* Original Modules */}
                 <Route path="education" element={<Education />} />
                 <Route path="healthcare" element={<Healthcare />} />
+                <Route path="healthcare-scanner" element={<ConsentFormScanner />} />
                 <Route path="transport" element={<Transport />} />
                 <Route path="housing" element={<Housing />} />
+                
 
                 {/* Marketplace */}
                 <Route path="marketplace" element={<PropertySearch />} />
