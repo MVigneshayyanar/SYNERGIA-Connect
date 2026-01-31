@@ -677,33 +677,33 @@ const MLSymptomChecker = ({ onBack }) => {
 
   return (
     <div className="animate-fade-in max-w-4xl mx-auto">
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-8 mb-8 text-white shadow-xl">
+      <div className="bg-white rounded-3xl p-8 mb-8 border border-slate-200 shadow-sm">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+          <div className="w-16 h-16 bg-slate-50 text-slate-900 rounded-2xl flex items-center justify-center">
             <Brain size={32} weight="duotone" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">ML-Powered Symptom Checker</h1>
-            <p className="text-purple-100">
+            <h1 className="text-3xl font-bold text-slate-900">ML-Powered Symptom Checker</h1>
+            <p className="text-slate-500">
               Machine Learning Disease Prediction
             </p>
           </div>
         </div>
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 mt-4">
+        <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-4">
           <div className="flex items-start gap-3 mb-3">
             <Lightning
               size={20}
-              className="mt-0.5 flex-shrink-0"
+              className="mt-0.5 flex-shrink-0 text-amber-500"
               weight="fill"
             />
-            <p className="text-sm text-purple-50">
+            <p className="text-sm text-slate-600">
               <strong>AI Model:</strong> Trained on 4,920 medical cases with 132
               symptoms across 41 diseases.
             </p>
           </div>
           <div className="flex items-start gap-3">
-            <Info size={20} className="mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-purple-50">
+            <Info size={20} className="mt-0.5 flex-shrink-0 text-blue-500" />
+            <p className="text-sm text-slate-600">
               <strong>Disclaimer:</strong> AI predictions are preliminary.
               Always consult a healthcare professional.
             </p>
@@ -719,7 +719,7 @@ const MLSymptomChecker = ({ onBack }) => {
                 key={num}
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
                   step >= num
-                    ? "bg-purple-600 text-white scale-110"
+                    ? "bg-slate-900 text-white scale-110"
                     : "bg-slate-200 text-slate-400"
                 }`}
               >
@@ -728,7 +728,7 @@ const MLSymptomChecker = ({ onBack }) => {
               {num < 3 && (
                 <div
                   className={`w-20 h-1 transition-all ${
-                    step > num ? "bg-purple-600" : "bg-slate-200"
+                    step > num ? "bg-slate-900" : "bg-slate-200"
                   }`}
                 ></div>
               )}
@@ -739,8 +739,8 @@ const MLSymptomChecker = ({ onBack }) => {
 
       {step === 1 && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 animate-slide-up">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <User size={28} className="text-purple-600" weight="duotone" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-slate-900">
+            <User size={28} className="text-slate-900" weight="duotone" />
             Basic Information
           </h2>
 
@@ -757,7 +757,7 @@ const MLSymptomChecker = ({ onBack }) => {
                 onChange={(e) =>
                   setPatientInfo({ ...patientInfo, age: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 outline-none"
                 placeholder="Enter your age"
               />
             </div>
@@ -773,7 +773,7 @@ const MLSymptomChecker = ({ onBack }) => {
                   }
                   className={`py-3 px-6 rounded-xl font-bold transition-all ${
                     patientInfo.sex === "male"
-                      ? "bg-purple-600 text-white shadow-lg"
+                      ? "bg-slate-900 text-white shadow-lg"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
@@ -785,7 +785,7 @@ const MLSymptomChecker = ({ onBack }) => {
                   }
                   className={`py-3 px-6 rounded-xl font-bold transition-all ${
                     patientInfo.sex === "female"
-                      ? "bg-purple-600 text-white shadow-lg"
+                      ? "bg-slate-900 text-white shadow-lg"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
@@ -807,7 +807,7 @@ const MLSymptomChecker = ({ onBack }) => {
                 }
               }}
               disabled={!patientInfo.age || !patientInfo.sex}
-              className="w-full bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Continue to Symptoms
             </button>
@@ -818,23 +818,23 @@ const MLSymptomChecker = ({ onBack }) => {
       {step === 2 && (
         <div className="space-y-6 animate-slide-up">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-              <Pulse size={28} className="text-purple-600" weight="duotone" />
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-slate-900">
+              <Pulse size={28} className="text-slate-900" weight="duotone" />
               Select Your Symptoms
             </h2>
 
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 mb-6">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
               <div className="flex items-start gap-3">
                 <Brain
                   size={20}
-                  className="text-purple-600 mt-0.5"
+                  className="text-blue-600 mt-0.5"
                   weight="fill"
                 />
                 <div>
-                  <p className="text-sm font-bold text-purple-900 mb-1">
+                  <p className="text-sm font-bold text-slate-900 mb-1">
                     ML Model Active
                   </p>
-                  <p className="text-xs text-purple-700">
+                  <p className="text-xs text-slate-600">
                     Searching from 132 symptoms in medical database.
                   </p>
                 </div>
@@ -846,7 +846,7 @@ const MLSymptomChecker = ({ onBack }) => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => handleSymptomSearch(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="Search symptoms (e.g., headache, fever, cough)..."
               />
 
@@ -856,7 +856,7 @@ const MLSymptomChecker = ({ onBack }) => {
                     <div
                       key={symptom.id}
                       onClick={() => addSymptom(symptom)}
-                      className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-slate-100 last:border-0 transition-colors"
+                      className="px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 transition-colors"
                     >
                       <p className="font-medium text-slate-900">
                         {symptom.common_name}
@@ -879,12 +879,12 @@ const MLSymptomChecker = ({ onBack }) => {
                   {symptoms.map((symptom) => (
                     <div
                       key={symptom.id}
-                      className="bg-purple-50 text-purple-700 px-4 py-2 rounded-lg font-medium flex items-center gap-2 group border border-purple-200"
+                      className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-medium flex items-center gap-2 group border border-slate-200"
                     >
                       {symptom.common_name}
                       <button
                         onClick={() => removeSymptom(symptom.id)}
-                        className="text-purple-400 hover:text-purple-600 transition-colors font-bold text-lg"
+                        className="text-slate-400 hover:text-slate-600 transition-colors font-bold text-lg"
                       >
                         ×
                       </button>
@@ -920,7 +920,7 @@ const MLSymptomChecker = ({ onBack }) => {
               <button
                 onClick={predictDisease}
                 disabled={symptoms.length === 0 || loading}
-                className="flex-1 bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -971,7 +971,7 @@ const MLSymptomChecker = ({ onBack }) => {
                     key={symptomId}
                     onClick={() => addSymptom(symptom)}
                     disabled={symptoms.find((s) => s.id === symptom.id)}
-                    className="px-3 py-2 text-sm bg-slate-50 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left border border-slate-200"
+                    className="px-3 py-2 text-sm bg-slate-50 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left border border-slate-200"
                   >
                     {symptom.common_name}
                   </button>
@@ -986,7 +986,7 @@ const MLSymptomChecker = ({ onBack }) => {
         <div className="space-y-6 animate-slide-up">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold flex items-center gap-3">
+              <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-900">
                 <CheckCircle
                   size={28}
                   className="text-green-600"
@@ -996,14 +996,14 @@ const MLSymptomChecker = ({ onBack }) => {
               </h2>
               <div className="text-right">
                 <p className="text-xs text-slate-500">Analyzed Symptoms</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-2xl font-bold text-blue-600">
                   {diagnosis.totalSymptoms}
                 </p>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 mb-6">
-              <p className="text-sm text-purple-700 flex items-center gap-2">
+            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
+              <p className="text-sm text-indigo-700 flex items-center gap-2">
                 <Brain size={18} weight="fill" />
                 <strong>ML Model:</strong> {diagnosis.mlModel}
               </p>
@@ -1017,7 +1017,7 @@ const MLSymptomChecker = ({ onBack }) => {
                     condition.urgent
                       ? "bg-red-50 border-red-200"
                       : index === 0
-                        ? "bg-purple-50 border-purple-300"
+                        ? "bg-indigo-50 border-indigo-200"
                         : "bg-slate-50 border-slate-200"
                   }`}
                 >
@@ -1032,7 +1032,7 @@ const MLSymptomChecker = ({ onBack }) => {
                           />
                         )}
                         {index === 0 && !condition.urgent && (
-                          <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-bold">
+                          <span className="bg-indigo-600 text-white text-xs px-2 py-1 rounded-full font-bold">
                             TOP MATCH
                           </span>
                         )}
@@ -1059,7 +1059,7 @@ const MLSymptomChecker = ({ onBack }) => {
                           condition.urgent
                             ? "text-red-600"
                             : index === 0
-                              ? "text-purple-600"
+                              ? "text-indigo-600"
                               : "text-blue-600"
                         }`}
                       >
@@ -1139,7 +1139,7 @@ const MLSymptomChecker = ({ onBack }) => {
               </button>
               <button
                 onClick={onBack}
-                className="flex-1 bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 transition-all shadow-lg"
+                className="flex-1 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg"
               >
                 Back to Healthcare
               </button>

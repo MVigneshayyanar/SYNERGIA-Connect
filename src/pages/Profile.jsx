@@ -3,12 +3,29 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User, Briefcase, CheckCircle, WarningCircle, Envelope, Phone, FileText, House, Plus, MapPin, Bed, Eye } from '@phosphor-icons/react';
 import { db } from '../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 const Profile = () => {
     const { userProfile, logout, currentUser } = useAuth();
     const [myProperties, setMyProperties] = useState([]);
     const [loadingProperties, setLoadingProperties] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editFormData, setEditFormData] = useState({});
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        if (userProfile && !isEditing) {
+            setEditFormData({
+                name: userProfile.name || '',
+                profession: userProfile.profession || '',
+                experience: userProfile.experience || '',
+                dob: userProfile.dob || '',
+                gender: userProfile.gender || '',
+                phone: userProfile.phone || '',
+                age: userProfile.age || ''
+            });
+        }
+    }, [userProfile, isEditing]);
 
     useEffect(() => {
         const fetchMyProperties = async () => {
@@ -30,7 +47,6 @@ const Profile = () => {
                 setMyProperties(properties);
             } catch (error) {
                 console.error('Error fetching properties:', error);
-                // Don't crash the page, just show empty properties
                 setMyProperties([]);
             } finally {
                 setLoadingProperties(false);
@@ -40,6 +56,51 @@ const Profile = () => {
         fetchMyProperties();
     }, [currentUser]);
 
+    const handleEditClick = () => {
+        setEditFormData({
+            name: userProfile.name || '',
+            profession: userProfile.profession || '',
+            experience: userProfile.experience || '',
+            dob: userProfile.dob || '',
+            gender: userProfile.gender || '',
+            phone: userProfile.phone || '',
+            age: userProfile.age || ''
+        });
+        setIsEditing(true);
+    };
+
+    const handleCancelClick = () => {
+        setIsEditing(false);
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSaveClick = async () => {
+        if (!currentUser) return;
+        setSaving(true);
+        try {
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userRef, editFormData);
+            
+            // We assume the context/auth provider will listen to real-time updates 
+            // and auto-update 'userProfile'. If not, we might need to manually trigger a refresh.
+            // For now, let's flip off editing mode.
+            setIsEditing(false);
+            alert("Profile updated successfully!");
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            alert("Failed to update profile. Please try again.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (!userProfile) {
         return <div className="p-8">Loading profile...</div>;
     }
@@ -48,12 +109,39 @@ const Profile = () => {
         <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-slate-900">My Profile</h1>
-                <button
-                    onClick={logout}
-                    className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
-                >
-                    Sign Out
-                </button>
+                <div className="flex gap-2">
+                    {isEditing ? (
+                        <>
+                            <button
+                                onClick={handleSaveClick}
+                                disabled={saving}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm disabled:opacity-50"
+                            >
+                                {saving ? "Saving..." : "Save Changes"}
+                            </button>
+                            <button
+                                onClick={handleCancelClick}
+                                disabled={saving}
+                                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium text-sm"
+                            >
+                                Cancel
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            onClick={handleEditClick}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                        >
+                            Edit Profile
+                        </button>
+                    )}
+                    <button
+                        onClick={logout}
+                        className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
+                    >
+                        Sign Out
+                    </button>
+                </div>
             </div>
 
             {/* Profile Header Card */}
@@ -75,18 +163,59 @@ const Profile = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 text-center md:text-left">
-                    <h2 className="text-2xl font-bold text-slate-900">{userProfile.name || 'User'}</h2>
-                    <div className="flex items-center justify-center md:justify-start gap-2 text-slate-500 mt-2 font-medium">
-                        <Briefcase size={18} weight="duotone" />
-                        <span>{userProfile.profession || 'Not specified'}</span>
-                        {userProfile.experience && (
-                            <>
-                                <span>•</span>
-                                <span>{userProfile.experience} Years Exp.</span>
-                            </>
-                        )}
-                    </div>
+                <div className="flex-1 text-center md:text-left w-full">
+                    {isEditing ? (
+                        <div className="space-y-3 max-w-md mx-auto md:mx-0">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase">Full Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={editFormData.name}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-lg text-slate-900"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Profession</label>
+                                    <input
+                                        type="text"
+                                        name="profession"
+                                        value={editFormData.profession}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                        placeholder="e.g. Student"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Experience (Yrs)</label>
+                                    <input
+                                        type="number"
+                                        name="experience"
+                                        value={editFormData.experience}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                        placeholder="e.g. 2"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <h2 className="text-2xl font-bold text-slate-900">{userProfile.name || 'User'}</h2>
+                            <div className="flex items-center justify-center md:justify-start gap-2 text-slate-500 mt-2 font-medium">
+                                <Briefcase size={18} weight="duotone" />
+                                <span>{userProfile.profession || 'Not specified'}</span>
+                                {userProfile.experience && (
+                                    <>
+                                        <span>•</span>
+                                        <span>{userProfile.experience} Years Exp.</span>
+                                    </>
+                                )}
+                            </div>
+                        </>
+                    )}
 
                     <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
                         <span className={`px-3 py-1 rounded-full text-sm font-medium border ${userProfile.verificationStatus === 'verified'
@@ -185,17 +314,51 @@ const Profile = () => {
                         Personal Information
                     </h3>
                     <div className="space-y-4">
-                        <div className="flex justify-between py-2 border-b border-slate-50">
+                        <div className="flex justify-between items-center py-2 border-b border-slate-50">
                             <span className="text-slate-500">Date of Birth</span>
-                            <span className="font-medium text-slate-900">{userProfile.dob || 'Not provided'}</span>
+                            {isEditing ? (
+                                <input
+                                    type="date"
+                                    name="dob"
+                                    value={editFormData.dob}
+                                    onChange={handleInputChange}
+                                    className="p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-sm w-48 text-right"
+                                />
+                            ) : (
+                                <span className="font-medium text-slate-900">{userProfile.dob || 'Not provided'}</span>
+                            )}
                         </div>
-                        <div className="flex justify-between py-2 border-b border-slate-50">
+                        <div className="flex justify-between items-center py-2 border-b border-slate-50">
                             <span className="text-slate-500">Gender</span>
-                            <span className="font-medium text-slate-900 capitalize">{userProfile.gender || 'Not provided'}</span>
+                            {isEditing ? (
+                                <select
+                                    name="gender"
+                                    value={editFormData.gender}
+                                    onChange={handleInputChange}
+                                    className="p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-sm w-32"
+                                >
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            ) : (
+                                <span className="font-medium text-slate-900 capitalize">{userProfile.gender || 'Not provided'}</span>
+                            )}
                         </div>
-                        <div className="flex justify-between py-2 border-b border-slate-50">
+                        <div className="flex justify-between items-center py-2 border-b border-slate-50">
                             <span className="text-slate-500">Age</span>
-                            <span className="font-medium text-slate-900">{userProfile.age || 'Not provided'}</span>
+                            {isEditing ? (
+                                <input
+                                    type="number"
+                                    name="age"
+                                    value={editFormData.age}
+                                    onChange={handleInputChange}
+                                    className="w-24 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-sm text-right"
+                                />
+                            ) : (
+                                <span className="font-medium text-slate-900">{userProfile.age || 'Not provided'}</span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -210,9 +373,20 @@ const Profile = () => {
                             <span className="text-slate-500 flex items-center gap-2"><Envelope size={16} /> Email</span>
                             <span className="font-medium text-slate-900">{userProfile.email}</span>
                         </div>
-                        <div className="flex justify-between py-2 border-b border-slate-50">
+                        <div className="flex justify-between items-center py-2 border-b border-slate-50">
                             <span className="text-slate-500 flex items-center gap-2"><Phone size={16} /> Phone</span>
-                            <span className="font-medium text-slate-900">{userProfile.phone || 'Not provided'}</span>
+                            {isEditing ? (
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={editFormData.phone}
+                                    onChange={handleInputChange}
+                                    className="p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm w-48 text-right"
+                                    placeholder="+91..."
+                                />
+                            ) : (
+                                <span className="font-medium text-slate-900">{userProfile.phone || 'Not provided'}</span>
+                            )}
                         </div>
                     </div>
                 </div>
