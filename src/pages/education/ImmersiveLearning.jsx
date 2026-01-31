@@ -42,6 +42,41 @@ const ImmersiveLearning = () => {
 
     const shapeCategories = [
         {
+            category: "Alphabet Learning",
+            items: [
+                { 
+                    id: "apple", name: "A for Apple", icon: Circle, desc: "A sweet, edible fruit produced by an apple tree.",
+                    render2D: ( <div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">A</div> )
+                },
+                { 
+                    id: "ball", name: "B for Ball", icon: Circle, desc: "A round object used in games.",
+                    render2D: ( <div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">B</div> )
+                },
+                { 
+                    id: "can", name: "C for Can", icon: Stack, desc: "A cylindrical metal container.",
+                    render2D: ( <div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">C</div> )
+                },
+                { 
+                    id: "dice", name: "D for Dice", icon: Square, desc: "A small object with marked sides used in games.",
+                    render2D: ( <div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">D</div> )
+                },
+                { 
+                    id: "egg", name: "E for Egg", icon: Circle, desc: "An oval object laid by female birds.",
+                    render2D: ( <div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">E</div> )
+                },
+                { id: "flag", name: "F for Flag", icon: Square, desc: "A piece of cloth used as a symbol.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">F</div>) },
+                { id: "gift", name: "G for Gift", icon: Square, desc: "A present given to someone.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">G</div>) },
+                { id: "hat", name: "H for Hat", icon: Circle, desc: "A covering for the head.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">H</div>) },
+                { id: "icecream", name: "I for Ice Cream", icon: Funnel, desc: "A frozen dessert.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">I</div>) },
+                { id: "jar", name: "J for Jar", icon: Stack, desc: "A glass container.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">J</div>) },
+                { id: "kite", name: "K for Kite", icon: Diamond, desc: "A toy that flies in the wind.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">K</div>) },
+                { id: "lamp", name: "L for Lamp", icon: Funnel, desc: "A device that gives light.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">L</div>) },
+                { id: "moon", name: "M for Moon", icon: Circle, desc: "The natural satellite of the earth.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">M</div>) },
+                { id: "notebook", name: "N for Notebook", icon: Square, desc: "A book for writing notes.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">N</div>) },
+                { id: "orange", name: "O for Orange", icon: Circle, desc: "A round reddish-yellow fruit.", render2D: (<div className="w-full h-full flex items-center justify-center text-6xl font-black text-slate-300">O</div>) }
+            ]
+        },
+        {
             category: "Platonic Solids",
             items: [
                 { 
@@ -177,6 +212,222 @@ const ImmersiveLearning = () => {
         const commonStyle = { transformStyle: "preserve-3d" };
         
         switch (activeShapeId) {
+            case "apple":
+                return (
+                    <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                        {/* Floating 'A' - Billboarded behavior helps but difficult in pure CSS, fixed rotation for now */}
+                        <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" 
+                             style={{ transform: "translateZ(0)" }}>
+                            A
+                        </div>
+
+                        {/* Apple Body - Volumetric Construction with Multiple Slices */}
+                        <div className="relative w-32 h-32 flex items-center justify-center" style={commonStyle}>
+                             {/* Vertical Slices (Meridians) to create dense volume */}
+                             {[0, 30, 60, 90, 120, 150].map((deg) => (
+                                 <div key={deg} className="absolute inset-0 rounded-full bg-red-600/10 border border-red-500/40 backdrop-blur-[1px]" 
+                                      style={{ transform: `rotateY(${deg}deg)` }}></div>
+                             ))}
+                             
+                             {/* Horizontal Slices (Latitudes) for shape definition */}
+                             <div className="absolute inset-0 m-auto w-28 h-28 rounded-full border border-red-400/30" style={{ transform: "rotateX(90deg) translateZ(10px)" }}></div>
+                             <div className="absolute inset-0 m-auto w-32 h-32 rounded-full border border-red-400/40" style={{ transform: "rotateX(90deg)" }}></div>
+                             <div className="absolute inset-0 m-auto w-28 h-28 rounded-full border border-red-400/30" style={{ transform: "rotateX(90deg) translateZ(-10px)" }}></div>
+
+                             {/* Inner Core Glow for Solidity */}
+                             <div className="absolute w-24 h-24 bg-red-500/20 blur-md rounded-full"></div>
+                        </div>
+
+                        {/* Stem */}
+                        <div className="absolute w-3 h-10 bg-amber-900 rounded-full" 
+                             style={{ transform: "translateY(-45px)", transformOrigin: "bottom" }}></div>
+
+                        {/* Leaf */}
+                        <div className="absolute w-12 h-6 bg-green-600/80 rounded-tr-[24px] rounded-bl-[4px] border border-green-400 shadow-sm" 
+                             style={{ transform: "translateY(-48px) translateX(12px) rotateZ(-30deg) rotateY(10deg) rotateX(10deg)" }}></div>
+                    </div>
+                )
+
+            case "ball":
+                return (
+                    <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                        <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>B</div>
+                        {/* Ball Body - Blue Sphere */}
+                         <div className="relative w-32 h-32 flex items-center justify-center" style={commonStyle}>
+                             {[0, 30, 60, 90, 120, 150].map((deg) => (
+                                 <div key={deg} className="absolute inset-0 rounded-full bg-blue-600/10 border border-blue-500/40 backdrop-blur-[1px]" style={{ transform: `rotateY(${deg}deg)` }}></div>
+                             ))}
+                             <div className="absolute w-28 h-28 rounded-full border border-blue-400/30" style={{ transform: "rotateX(90deg)" }}></div>
+                             <div className="absolute w-24 h-24 bg-blue-500/20 blur-md rounded-full"></div>
+                             {/* Stripe */}
+                             <div className="absolute w-32 h-6 border-y-4 border-yellow-400/60 bg-yellow-400/20 rounded-[50%]" style={{ transform: "rotateZ(-15deg)" }}></div>
+                        </div>
+                    </div>
+                )
+
+            case "can":
+                return (
+                    <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                         <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>C</div>
+                         {/* Can Body - Cylinder */}
+                         <div className="relative w-24 h-36 flex items-center justify-center" style={commonStyle}>
+                            {[0, 45, 90, 135].map((deg) => (
+                                <div key={deg} className="absolute w-24 h-36 bg-slate-300/20 border-x border-slate-400/40" style={{ transform: `rotateY(${deg}deg)` }}></div>
+                            ))}
+                            {/* Label */}
+                            <div className="absolute w-24 h-24 bg-red-600/40 border-y border-red-500" style={{ transform: "translateZ(12px) rotateY(0deg)" }}></div>
+                            <div className="absolute w-24 h-24 bg-red-600/40 border-y border-red-500" style={{ transform: "rotateY(90deg) translateZ(12px)" }}></div>
+
+                            <div className="absolute w-24 h-24 rounded-full bg-slate-300/40 border border-slate-400" style={{ transform: "rotateX(90deg) translateZ(72px)" }}></div>
+                            <div className="absolute w-24 h-24 rounded-full bg-slate-300/40 border border-slate-400" style={{ transform: "rotateX(90deg) translateZ(-72px)" }}></div>
+                         </div>
+                    </div>
+                )
+
+            case "dice":
+                return (
+                    <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                        <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>D</div>
+                        <div className="relative w-24 h-24" style={commonStyle}>
+                             <div className="absolute inset-0 bg-white/90 border-2 border-slate-300 flex items-center justify-center" style={{ transform: "translateZ(48px)" }}>
+                                 <div className="w-5 h-5 rounded-full bg-black shadow-inner"></div>
+                             </div>
+                             <div className="absolute inset-0 bg-white/90 border-2 border-slate-300 flex items-center justify-center" style={{ transform: "translateZ(-48px) rotateY(180deg)" }}>
+                                 <div className="grid grid-cols-2 gap-2"><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 bg-black rounded-full"></div></div>
+                             </div>
+                             <div className="absolute inset-0 bg-white/90 border-2 border-slate-300 flex items-center justify-center" style={{ transform: "translateX(48px) rotateY(90deg)" }}>
+                                 <div className="flip flex gap-2"><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div></div>
+                             </div>
+                             <div className="absolute inset-0 bg-white/90 border-2 border-slate-300 flex items-center justify-center" style={{ transform: "translateX(-48px) rotateY(-90deg)" }}>
+                                 <div className="flex gap-1 flex-wrap w-12 justify-center"><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div></div>
+                             </div>
+                             <div className="absolute inset-0 bg-white/90 border-2 border-slate-300 flex items-center justify-center" style={{ transform: "translateY(-48px) rotateX(90deg)" }}>
+                                 <div className="rotate-45 flex gap-2"><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div></div>
+                             </div>
+                             <div className="absolute inset-0 bg-white/90 border-2 border-slate-300 flex items-center justify-center" style={{ transform: "translateY(48px) rotateX(-90deg)" }}>
+                                 <div className="grid grid-cols-2 gap-3"><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div><div className="w-4 h-4 rounded-full bg-black"></div></div>
+                             </div>
+                        </div>
+                    </div>
+                )
+
+            case "egg":
+                return (
+                    <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                         <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>E</div>
+                         <div className="relative w-24 h-32 flex items-center justify-center" style={commonStyle}>
+                              {[0, 30, 60, 90, 120, 150].map((deg) => (
+                                 <div key={deg} className="absolute inset-0 rounded-[50%/60%_60%_40%_40%] bg-amber-100/20 border border-amber-200/40 backdrop-blur-[1px]" style={{ transform: `rotateY(${deg}deg)` }}></div>
+                             ))}
+                             <div className="absolute w-20 h-20 bg-amber-200/20 blur-xl rounded-full"></div>
+                         </div>
+                    </div>
+                )
+
+            case "flag": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>F</div>
+                     <div className="absolute w-2 h-64 bg-slate-400 rounded-full" style={{ transform: "translateX(-40px) translateY(20px)" }}></div>
+                     <div className="absolute w-40 h-28 bg-red-500/80 border border-red-400 origin-left animate-pulse" style={{ transform: "translateX(-38px) translateY(-50px) rotateY(10deg)" }}></div>
+                </div>
+            )
+            case "gift": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>G</div>
+                     <div className="relative w-32 h-32" style={commonStyle}>
+                        <div className="absolute inset-0 bg-red-600/20 border-2 border-red-500/50" style={{transform:"translateZ(64px)"}}></div>
+                        <div className="absolute inset-0 bg-red-600/20 border-2 border-red-500/50" style={{transform:"rotateY(90deg) translateZ(64px)"}}></div>
+                        <div className="absolute inset-0 bg-red-600/20 border-2 border-red-500/50" style={{transform:"rotateY(180deg) translateZ(64px)"}}></div>
+                        <div className="absolute inset-0 bg-red-600/20 border-2 border-red-500/50" style={{transform:"rotateY(-90deg) translateZ(64px)"}}></div>
+                        <div className="absolute inset-0 bg-red-600/20 border-2 border-red-500/50" style={{transform:"rotateX(90deg) translateZ(64px)"}}></div>
+                        <div className="absolute inset-0 bg-red-600/20 border-2 border-red-500/50" style={{transform:"rotateX(-90deg) translateZ(64px)"}}></div>
+                        {/* Ribbon */}
+                        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-8 bg-yellow-400/80" style={{transform:"translateZ(65px)"}}></div>
+                        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-8 bg-yellow-400/80" style={{transform:"translateZ(65px)"}}></div>
+                     </div>
+                </div>
+            )
+            case "hat": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>H</div>
+                     <div className="relative w-24 h-24" style={commonStyle}>
+                        {/* Top Hat Body */}
+                        <div className="absolute bottom-0 w-24 h-32 bg-slate-900 border-x border-slate-700" style={{transform:"translateY(10px)"}}></div>
+                        <div className="absolute bottom-0 w-24 h-32 bg-slate-900 border-x border-slate-700" style={{transform:"translateY(10px) rotateY(90deg)"}}></div>
+                        {/* Brim */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full border-[20px] border-slate-900 bg-slate-900/50" style={{transform:"rotateX(90deg) translateZ(-40px)"}}></div>
+                     </div>
+                </div>
+            )
+            case "icecream": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>I</div>
+                     {/* Cone */}
+                     <div className="absolute bottom-0 w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-t-[90px] border-t-amber-300" style={{transform:"translateY(40px)"}}></div>
+                     <div className="absolute bottom-0 w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-t-[90px] border-t-amber-300" style={{transform:"translateY(40px) rotateY(90deg)"}}></div>
+                     {/* Scoop - Pink Sphere approximation */}
+                     <div className="absolute top-8 w-24 h-24 rounded-full bg-pink-400 outline outline-4 outline-pink-300/50" style={{transform:"translateY(-20px)"}}></div>
+                </div>
+            )
+            case "jar": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>J</div>
+                     {/* Jar Body */}
+                     {[0,45,90,135].map(d=><div key={d} className="absolute w-24 h-32 bg-cyan-100/20 border-x border-white/30" style={{transform:`rotateY(${d}deg)`}}></div>)}
+                     {/* Lid */}
+                     <div className="absolute w-24 h-24 rounded-full border-[4px] border-slate-400 bg-slate-300" style={{transform:"rotateX(90deg) translateZ(64px)"}}></div>
+                </div>
+            )
+            case "kite": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>K</div>
+                     <div className="w-32 h-40 bg-purple-500/80 rotate-45 border-4 border-white/50" style={{clipPath:"polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)", transform:"rotateZ(0deg)"}}></div>
+                     {/* Stick */}
+                     <div className="absolute w-1 h-56 bg-white" style={{transform:"translateZ(-1px)"}}></div>
+                     <div className="absolute w-40 h-1 bg-white" style={{transform:"translateZ(-1px) translateY(-10px)"}}></div>
+                     {/* Tail */}
+                     <div className="absolute w-1 h-32 bg-white origin-top animate-bounce delay-75" style={{transform:"translateY(80px)"}}></div>
+                </div>
+            )
+            case "lamp": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>L</div>
+                     {/* Shade */}
+                     <div className="absolute top-0 w-32 h-24 bg-yellow-200/80 border-b-[40px] border-b-yellow-500 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent" style={{transform:"translateY(-20px)"}}></div>
+                     {/* Base */}
+                     <div className="absolute bottom-0 w-4 h-32 bg-slate-700" style={{transform:"translateY(40px)"}}></div>
+                     <div className="absolute bottom-0 w-24 h-4 bg-slate-800 rounded-full" style={{transform:"translateY(56px) rotateX(90deg)"}}></div>
+                </div>
+            )
+            case "moon": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>M</div>
+                     <div className="w-32 h-32 rounded-full bg-slate-200 shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.5)] flex items-center justify-center">
+                        <div className="absolute top-6 left-6 w-6 h-6 rounded-full bg-slate-300 shadow-inner"></div>
+                        <div className="absolute bottom-8 right-8 w-10 h-10 rounded-full bg-slate-300 shadow-inner"></div>
+                        <div className="absolute top-12 right-6 w-4 h-4 rounded-full bg-slate-300 shadow-inner"></div>
+                     </div>
+                </div>
+            )
+            case "notebook": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>N</div>
+                     <div className="w-32 h-44 bg-blue-600 rounded-r-xl border-l-[12px] border-l-black flex flex-col p-2 gap-2" style={{transform:"rotateY(-10deg)"}}>
+                        <div className="w-full h-8 bg-white/20 rounded"></div>
+                        <div className="w-full h-full bg-white/10 rounded"></div>
+                     </div>
+                </div>
+            )
+            case "orange": return (
+                <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                     <div className="absolute -top-24 text-8xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce" style={{ transform: "translateZ(0)" }}>O</div>
+                     <div className="relative w-32 h-32 flex items-center justify-center" style={commonStyle}>
+                             {[0, 30, 60, 90, 120, 150].map((deg) => <div key={deg} className="absolute inset-0 rounded-full bg-orange-500/10 border border-orange-500/40" style={{ transform: `rotateY(${deg}deg)` }}></div>)}
+                             <div className="absolute w-24 h-24 bg-orange-500/20 blur-md rounded-full"></div>
+                     </div>
+                </div>
+            )
+
             case "cube":
             case "rect-prism":
                 return (
@@ -275,6 +526,203 @@ const ImmersiveLearning = () => {
                         <div className="absolute w-full h-full rounded-full border-[1px] border-white/20" style={{ transform: "rotateX(90deg)" }}></div>
                      </div>
                  )
+            
+            case "tri-prism":
+                return (
+                    <div className="relative flex items-center justify-center" style={commonStyle}>
+                        {/* Sides: 3 rectangles. Width ~100px. dist ~29px? 100/2*tan(60) = 28.8 */}
+                        <div className="absolute w-28 h-48 bg-cyan-500/20 border-2 border-cyan-400/50 backdrop-blur-sm" style={{ transform: "rotateY(0deg) translateZ(28px)" }}></div>
+                        <div className="absolute w-28 h-48 bg-purple-500/20 border-2 border-purple-400/50 backdrop-blur-sm" style={{ transform: "rotateY(120deg) translateZ(28px)" }}></div>
+                        <div className="absolute w-28 h-48 bg-blue-500/20 border-2 border-blue-400/50 backdrop-blur-sm" style={{ transform: "rotateY(240deg) translateZ(28px)" }}></div>
+
+                        {/* Top & Bottom (Triangles) */}
+                        <div className="absolute w-0 h-0 border-l-[60px] border-l-transparent border-r-[60px] border-r-transparent border-b-[104px] border-b-cyan-400/30 backdrop-blur-md" style={{ transform: "rotateX(90deg) translateZ(100px) translateY(-5px)" }}></div>
+                        <div className="absolute w-0 h-0 border-l-[60px] border-l-transparent border-r-[60px] border-r-transparent border-b-[104px] border-b-cyan-400/30 backdrop-blur-md" style={{ transform: "rotateX(90deg) translateZ(-100px) translateY(-5px)" }}></div>
+                    </div>
+                )
+
+            case "hex-prism":
+                return (
+                    <div className="relative flex items-center justify-center" style={commonStyle}>
+                        {/* Sides: 6 rectangles. Width 60px. dist ~52px */}
+                        {[0, 60, 120, 180, 240, 300].map((deg, i) => (
+                            <div key={i} className="absolute w-16 h-48 bg-cyan-500/20 border border-cyan-400/40 backdrop-blur-sm" 
+                                style={{ transform: `rotateY(${deg}deg) translateZ(54px)` }}>
+                            </div>
+                        ))}
+                        
+                        {/* Top & Bottom (Hexagons) */}
+                        <div className="absolute w-32 h-32 bg-cyan-400/30 backdrop-blur-md" 
+                             style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', transform: "rotateX(90deg) translateZ(96px)" }}></div>
+                        <div className="absolute w-32 h-32 bg-cyan-400/30 backdrop-blur-md" 
+                             style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', transform: "rotateX(90deg) translateZ(-96px)" }}></div>
+                    </div>
+                )
+
+            case "truncated-icosahedron": // Soccer Ball - Approximated as a Dodecahedron (12 Pentagons) for CSS feasibility
+                // A true truncated icosahedron has 32 faces. We use 12 pentagons (Dodecahedron) as a stylized proxy.
+                const pentagonClip = "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)";
+                // Dihedral angle approx 116.565 deg? For Dodecahedron: 
+                // We'll use a pre-calculated arrangement for CSS Dodecahedron
+                const faces = [
+                    { rX: 0, rY: 0, tZ: 60, rZ: 0 }, // Front?
+                    // This is complex. Let's use a "Tech Sphere" approximation instead which looks cooler and closer to the icon style
+                    // Rotating rings + Hexagons
+                ];
+                return (
+                    <div className="relative w-48 h-48 flex items-center justify-center" style={commonStyle}>
+                         {/* Core Sphere */}
+                         <div className="absolute inset-0 rounded-full border border-cyan-500/30 bg-cyan-900/10 backdrop-blur-sm"></div>
+                         
+                         {/* Floating Hexagons on surface approximation */}
+                         {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
+                             <div key={i} className="absolute w-16 h-16 bg-white/5 border border-white/20" 
+                                  style={{ 
+                                      clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+                                      transform: `rotateY(${deg}deg) rotateX(45deg) translateZ(90px)`
+                                  }}>
+                             </div>
+                         ))}
+                         {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
+                             <div key={i} className="absolute w-16 h-16 bg-white/5 border border-white/20" 
+                                  style={{ 
+                                      clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+                                      transform: `rotateY(${deg}deg) rotateX(-45deg) translateZ(90px)`
+                                  }}>
+                             </div>
+                         ))}
+                    </div>
+                )
+
+            case "frustum": // Truncated Pyramid (Square)
+                return (
+                    <div className="relative flex items-center justify-center" style={commonStyle}>
+                        {/* Base (Large Square) */}
+                        <div className="absolute w-40 h-40 bg-cyan-500/20 border border-cyan-400/50" style={{ transform: "rotateX(90deg) translateZ(-60px)" }}></div>
+                        {/* Top (Small Square) */}
+                        <div className="absolute w-20 h-20 bg-cyan-500/20 border border-cyan-400/50" style={{ transform: "rotateX(90deg) translateZ(60px)" }}></div>
+                        
+                        {/* 4 Trapezoidal Sides */}
+                        {/* Front */}
+                        <div className="absolute w-40 h-[124px] bg-cyan-400/10 border border-cyan-400/30" 
+                             style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)', transform: "translateZ(20px) rotateX(15deg) translateY(-10px)", height: '125px' }}></div>
+                        {/* Back */}
+                        <div className="absolute w-40 h-[124px] bg-cyan-400/10 border border-cyan-400/30" 
+                             style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)', transform: "rotateY(180deg) translateZ(20px) rotateX(15deg) translateY(-10px)", height: '125px' }}></div>
+                        {/* Left */}
+                        <div className="absolute w-40 h-[124px] bg-cyan-400/10 border border-cyan-400/30" 
+                             style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)', transform: "rotateY(-90deg) translateZ(20px) rotateX(15deg) translateY(-10px)", height: '125px' }}></div>
+                        {/* Right */}
+                        <div className="absolute w-40 h-[124px] bg-cyan-400/10 border border-cyan-400/30" 
+                             style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)', transform: "rotateY(90deg) translateZ(20px) rotateX(15deg) translateY(-10px)", height: '125px' }}></div>
+                    </div>
+                )
+
+            case "prismatoid": // Wedge shape (Rectangular base, Top Line)
+                 return (
+                    <div className="relative flex items-center justify-center" style={commonStyle}>
+                        {/* Base */}
+                        <div className="absolute w-40 h-32 bg-cyan-500/20 border border-cyan-400/50" style={{ transform: "rotateX(90deg) translateZ(-60px)" }}></div>
+                        
+                        {/* Sloped Rectangles (Front/Back) */}
+                        <div className="absolute w-40 h-[134px] bg-cyan-400/10 border border-cyan-400/30" style={{ transform: "translateZ(-16px) rotateX(24deg)" }}></div>
+                        <div className="absolute w-40 h-[134px] bg-cyan-400/10 border border-cyan-400/30" style={{ transform: "rotateY(180deg) translateZ(-16px) rotateX(24deg)" }}></div>
+
+                        {/* Triangular Ends (Left/Right) */}
+                        <div className="absolute w-32 h-[120px] bg-cyan-500/20 border-b border-cyan-400/50" 
+                             style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', transform: "rotateY(-90deg) translateZ(80px)" }}></div>
+                        <div className="absolute w-32 h-[120px] bg-cyan-500/20 border-b border-cyan-400/50" 
+                             style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', transform: "rotateY(90deg) translateZ(80px)" }}></div>
+                    </div>
+                 )
+
+            case "dodecahedron":
+                // 12 Pentagonal faces
+                // CSS implementation is complex, using an approximate layout
+                return (
+                    <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                        {/* Lower Half */}
+                        {[0, 72, 144, 216, 288].map((deg, i) => (
+                            <div key={`d-lower-${i}`} className="absolute w-24 h-24 bg-cyan-500/10 border border-cyan-400/30 backdrop-blur-sm"
+                                style={{ 
+                                    clipPath: "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+                                    transform: `rotateY(${deg}deg) translateZ(35px) rotateX(-63.4deg)`,
+                                    transformOrigin: "center bottom"
+                                }}>
+                            </div>
+                        ))}
+                        <div className="absolute w-24 h-24 bg-cyan-500/10 border border-cyan-400/30 backdrop-blur-sm"
+                             style={{ 
+                                 clipPath: "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+                                 transform: `translateY(40px) rotateX(-90deg) rotateZ(36deg) translateZ(35px)` 
+                             }}></div>
+
+                        {/* Upper Half (Inverted) */}
+                        {[0, 72, 144, 216, 288].map((deg, i) => (
+                            <div key={`d-upper-${i}`} className="absolute w-24 h-24 bg-purple-500/10 border border-purple-400/30 backdrop-blur-sm"
+                                style={{ 
+                                    clipPath: "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+                                    transform: `rotateY(${deg + 36}deg) translateZ(35px) rotateX(63.4deg)`,
+                                    transformOrigin: "center top"
+                                }}>
+                            </div>
+                        ))}
+                        <div className="absolute w-24 h-24 bg-purple-500/10 border border-purple-400/30 backdrop-blur-sm"
+                             style={{ 
+                                 clipPath: "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+                                 transform: `translateY(-40px) rotateX(90deg) rotateZ(36deg) translateZ(35px)` 
+                             }}></div>
+                    </div>
+                )
+
+            case "icosahedron":
+                // 20 Triangular faces (Equilateral)
+                // Top Cap (5), Middle Band (10), Bottom Cap (5)
+                const triHeight = 86; // approx for w=100
+                const zDist = 70; // approx
+                
+                return (
+                    <div className="relative w-40 h-40 flex items-center justify-center" style={commonStyle}>
+                        {/* Top Cap (5) */}
+                        {[0, 72, 144, 216, 288].map((deg, i) => (
+                            <div key={`i-top-${i}`} className="absolute w-0 h-0 border-l-[50px] border-l-transparent border-r-[50px] border-r-transparent border-b-[86px] border-b-cyan-400/20 backdrop-blur-sm"
+                                style={{ 
+                                    transformOrigin: "50% 100%",
+                                    transform: `rotateY(${deg}deg) translateZ(30px) rotateX(37.4deg) translateY(-86px)`
+                                }}>
+                                <div className="absolute -left-[50px] top-[86px] w-[100px] h-[1px] bg-cyan-400/40"></div> {/* simple border approx */}
+                            </div>
+                        ))}
+                        
+                        {/* Middle Band (10 - 5 Pointing Down, 5 Pointing Up) */}
+                         {[0, 72, 144, 216, 288].map((deg, i) => (
+                            <div key={`i-mid-down-${i}`} className="absolute w-0 h-0 border-l-[50px] border-l-transparent border-r-[50px] border-r-transparent border-t-[86px] border-t-blue-500/20 backdrop-blur-sm"
+                                style={{ 
+                                    transformOrigin: "50% 0%",
+                                    transform: `rotateY(${deg}deg) translateZ(80px) rotateX(0deg) translateY(-43px)`
+                                }}>
+                            </div>
+                        ))}
+                         {[0, 72, 144, 216, 288].map((deg, i) => (
+                            <div key={`i-mid-up-${i}`} className="absolute w-0 h-0 border-l-[50px] border-l-transparent border-r-[50px] border-r-transparent border-b-[86px] border-b-indigo-500/20 backdrop-blur-sm"
+                                style={{ 
+                                    transformOrigin: "50% 100%",
+                                    transform: `rotateY(${deg + 36}deg) translateZ(80px) rotateX(180deg) translateY(43px) rotateX(180deg)` // tricky manual positioning
+                                }}>
+                            </div>
+                        ))}
+
+                        {/* Bottom Cap (5) */}
+                         {[0, 72, 144, 216, 288].map((deg, i) => (
+                            <div key={`i-bot-${i}`} className="absolute w-0 h-0 border-l-[50px] border-l-transparent border-r-[50px] border-r-transparent border-t-[86px] border-t-purple-400/20 backdrop-blur-sm"
+                                style={{ 
+                                    transformOrigin: "50% 0%",
+                                    transform: `rotateY(${deg + 36}deg) translateZ(30px) rotateX(-37.4deg) translateY(0px)` // Approx
+                                }}>
+                            </div>
+                        ))}
+                    </div>
+                )
 
             // Fallback Component for Complex shapes (Dodecahedron, Icosahedron, Prisms, Advanced)
             default:

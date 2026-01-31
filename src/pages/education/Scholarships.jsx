@@ -108,9 +108,14 @@ const Scholarships = () => {
                                     <span className="block font-bold text-slate-800 text-lg">Active</span>
                                 </div>
                             </div>
-                            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400 flex items-center">
-                                <Buildings size={14} className="mr-1"/>
-                                {foundation.address || "Location not specified"}
+                            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <div className="text-xs text-slate-400 flex items-center max-w-[60%] truncate">
+                                    <Buildings size={14} className="mr-1 shrink-0"/>
+                                    <span className="truncate">{foundation.address || "Location not specified"}</span>
+                                </div>
+                                <button className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm">
+                                    Apply Now
+                                </button>
                             </div>
                         </div>
                     ))}
