@@ -6,14 +6,13 @@ import * as cheerio from 'cheerio';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// CORS configuration - update with your Vercel frontend URL
+// CORS configuration
 app.use(cors({
     origin: [
         'http://localhost:5173',
         'http://localhost:3000',
+        'https://synergia-connect.vercel.app',  // Production frontend
         /\.vercel\.app$/,  // Allow all Vercel preview URLs
-        // Add your production Vercel URL here:
-        // 'https://your-app.vercel.app'
     ],
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true
