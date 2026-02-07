@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { House, Users, Wrench, CurrencyDollar, ChartLineUp, Warning, CheckCircle, Clock, Plus } from '@phosphor-icons/react';
-import BackButton from '../../components/BackButton';
-import { useAuth } from '../../context/AuthContext';
+import BackButton from '../../../components/BackButton';
+import { useAuth } from '../../../context/AuthContext';
 
 const LandlordDashboard = () => {
     const { userProfile } = useAuth();

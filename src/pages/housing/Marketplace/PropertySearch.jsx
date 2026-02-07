@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MagnifyingGlass, MapPin, Funnel, SquaresFour, List, Plus, Bed, Bathtub, Ruler } from '@phosphor-icons/react';
-import BackButton from '../../components/BackButton';
+import BackButton from '../../../components/BackButton';
 
 const PropertySearch = () => {
     const [viewMode, setViewMode] = useState('grid');
@@ -115,8 +115,8 @@ const PropertySearch = () => {
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className={`flex items-center gap-2 px-5 py-3 rounded-xl border transition-all font-medium ${showFilters
-                                ? 'bg-[#FF6347] text-white border-[#FF6347]'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-[#FF6347] hover:text-[#FF6347]'
+                            ? 'bg-[#FF6347] text-white border-[#FF6347]'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-[#FF6347] hover:text-[#FF6347]'
                             }`}
                     >
                         <Funnel size={18} />
@@ -132,8 +132,8 @@ const PropertySearch = () => {
                                 key={filter.value}
                                 onClick={() => setActiveFilter(filter.value)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === filter.value
-                                        ? 'bg-[#FF6347] text-white'
-                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                    ? 'bg-[#FF6347] text-white'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                     }`}
                             >
                                 {filter.label}

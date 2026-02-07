@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CreditCard, Buildings, Calendar, CheckCircle, Clock, Receipt } from '@phosphor-icons/react';
-import BackButton from '../../components/BackButton';
-import { useAuth } from '../../context/AuthContext';
+import BackButton from '../../../components/BackButton';
+import { useAuth } from '../../../context/AuthContext';
 
 const PaymentPortal = () => {
     const { userProfile } = useAuth();
