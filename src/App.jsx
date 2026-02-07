@@ -12,14 +12,14 @@ import { Education, Healthcare, Transport, Housing } from "./pages/Modules";
 import ConsentFormScanner from "./pages/healthcare/ConsentFormScanner";
 
 // Marketplace
-import PropertySearch from "./pages/Marketplace/PropertySearch";
-import PropertyDetails from "./pages/Marketplace/PropertyDetails";
+import PropertySearch from "./pages/housing/Marketplace/PropertySearch";
+import PropertyDetails from "./pages/housing/Marketplace/PropertyDetails";
 
 // Property Management
-import TenantDashboard from "./pages/PropertyManagement/TenantDashboard";
-import LandlordDashboard from "./pages/PropertyManagement/LandlordDashboard";
-import PaymentPortal from "./pages/PropertyManagement/PaymentPortal";
-import MaintenanceRequests from "./pages/PropertyManagement/MaintenanceRequests";
+import TenantDashboard from "./pages/housing/PropertyManagement/TenantDashboard";
+import LandlordDashboard from "./pages/housing/PropertyManagement/LandlordDashboard";
+import PaymentPortal from "./pages/housing/PropertyManagement/PaymentPortal";
+import MaintenanceRequests from "./pages/housing/PropertyManagement/MaintenanceRequests";
 
 // Home Services
 import ServiceBrowse from "./pages/HomeServices/ServiceBrowse";
@@ -49,7 +49,7 @@ function App() {
                 <Route path="healthcare-scanner" element={<ConsentFormScanner />} />
                 <Route path="transport" element={<Transport />} />
                 <Route path="housing" element={<Housing />} />
-                
+
 
                 {/* Marketplace */}
                 <Route path="marketplace" element={<PropertySearch />} />
